@@ -24,7 +24,11 @@ Player = {
         if xJob.grade_name ~= 'boss' then
             return
         elseif xJob.name == yJob.name then
-            yTarget.setJob(Config.Company.job, 0)
+            if ESX.DoesJobExist(Config.Company.default.job, Config.Company.default.grade) then
+                yTarget.setJob(Config.Company.default.job, Config.Company.default.grade)
+            else
+                yTarget.setJob('unemployed', 0)
+            end
 
             Config.Notification(xPlayer.source, (Strings.company_you_fired):format(yTarget.getName()))
             Config.Notification(yTarget.source, (Strings.company_by_fired):format(xPlayer.getName()))

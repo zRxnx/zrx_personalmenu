@@ -16,7 +16,10 @@ Config.Menu = {
 }
 
 Config.Company = {
-    job = 'unemployed' --| Job when you get fired
+    default = {
+        job = 'unemployed', --| Job when you get fired
+        grade = 0 --| Job grade when you get fired
+    }
 }
 
 Config.Navigation = {
@@ -30,6 +33,7 @@ Config.Navigation = {
     },
     route = function(coords, text) --| Change it if you know what you are doing
         local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
+
         SetBlipSprite(blip, 38)
         SetBlipColour(blip, 0)
         SetBlipScale(blip, 1.0)
