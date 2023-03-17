@@ -28,4 +28,4 @@ This is an advanced personal menu system for fivem
 ## Installation
 - Download script
 - Put script in your `resources` directory
-- Add `ensure zrx_repairkit` in your `server.cfg`
+- Add `ensure zrx_personalmenu` in your `server.cfg`
