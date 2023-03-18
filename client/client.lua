@@ -1,4 +1,32 @@
 ESX, COOLDOWN = Config.esxImport(), nil
+local GetEntityCoords = GetEntityCoords
+local DisableOcclusionThisFrame = DisableOcclusionThisFrame
+local SetDisableDecalRenderingThisFrame = SetDisableDecalRenderingThisFrame
+local RemoveParticleFxInRange = RemoveParticleFxInRange
+local OverrideLodscaleThisFrame = OverrideLodscaleThisFrame
+local SetArtificialLightsState = SetArtificialLightsState
+local ClearAllBrokenGlass = ClearAllBrokenGlass
+local LeaderboardsReadClearAll = LeaderboardsReadClearAll
+local ClearBrief = ClearBrief
+local ClearGpsFlags = ClearGpsFlags
+local ClearPrints = ClearPrints
+local ClearSmallPrints = ClearSmallPrints
+local ClearReplayStats = ClearReplayStats
+local LeaderboardsClearCacheData = LeaderboardsClearCacheData
+local ClearFocus = ClearFocus
+local ClearHdArea = ClearHdArea
+local ClearPedBloodDamage = ClearPedBloodDamage
+local ClearPedWetness = ClearPedWetness
+local ClearPedEnvDirt = ClearPedEnvDirt
+local ResetPedVisibleDamage = ResetPedVisibleDamage
+local ClearPedLastWeaponDamage = ClearPedLastWeaponDamage
+local ClearExtraTimecycleModifier = ClearExtraTimecycleModifier
+local ClearTimecycleModifier = ClearTimecycleModifier
+local ClearOverrideWeather = ClearOverrideWeather
+local DisableVehicleDistantlights = DisableVehicleDistantlights
+local DisableScreenblurFade = DisableScreenblurFade
+local SetRainLevel = SetRainLevel
+local SetWindSpeed = SetWindSpeed
 
 RegisterNetEvent('esx:playerLoaded',function(xPlayer)
     ESX.PlayerData = xPlayer
@@ -48,9 +76,10 @@ CreateThread(function()
             DisableScreenblurFade()
             SetRainLevel(0.0)
             SetWindSpeed(0.0)
+            Wait()
+        else
+            Wait(2000)
         end
-
-        Wait(2000)
     goto loop
 end)
 

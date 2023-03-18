@@ -7,6 +7,7 @@ Config.Key = 'F5' --| Note: its a keyMapping
 Config.Cooldown = 3 * seconds --| Note: Only for client > server or server > client | To disable set to 0
 Config.Menu = {
     informations = true,
+    idcard = true, --| Default: JSfour IDcard
     settings = true,
     vehicle = true,
     bills = true,

@@ -11,6 +11,7 @@ Strings = {
     menu_main = 'Personal menu',
     menu_info = 'Personal menu - Info',
     menu_info_lice = 'Personal menu - Informations licenses',
+    menu_idcard = 'Personal menu - IDCard',
     menu_veh = 'Personal menu - Vehicle',
     menu_veh_extra = 'Personal menu - Vehicle extras',
     menu_veh_livery = 'Personal menu - Vehicle liverys',
@@ -24,6 +25,9 @@ Strings = {
 
     info_title = 'Informations',
     info_desc = 'Show your character informations',
+
+    idcard_title = 'IDCard',
+    idcard_desc = 'View/Show your IDCards',
 
     setting_title = 'Settings',
     setting_desc = 'Edit some settings for you',
@@ -75,6 +79,24 @@ Strings = {
 
     lice_title = 'Licenses',
     lice_desc = 'See your licenses',
+
+    idcard_view_title = 'IDCARD',
+    idcard_view_desc = 'View your IDcard',
+
+    idcard_show_title = 'IDCARD',
+    idcard_show_desc = 'Show your IDcard',
+
+    driver_view_title = 'Driver',
+    driver_view_desc = 'View your driver license',
+
+    driver_show_title = 'DRIVER',
+    driver_show_desc = 'Show your driver license',
+
+    weapon_view_title = 'WEAPON',
+    weapon_view_desc = 'View your weapon license',
+
+    weapon_show_title = 'WEAPON',
+    weapon_show_desc = 'Show your weapon license',
 
     eng_title = 'Toggle Engine',
     eng_desc = 'Disable/Enable the engine',

@@ -13,6 +13,17 @@ OpenMainMenu = function()
         }
     end
 
+    if Config.Menu.idcard then
+        MENU[#MENU + 1] = {
+            title = Strings.idcard_title,
+            description = Strings.idcard_desc,
+            arrow = true,
+            onSelect = function()
+                OpenIDcardMenu()
+            end
+        }
+    end
+
     if Config.Menu.settings then
         MENU[#MENU + 1] = {
             title = Strings.setting_title,
@@ -211,6 +222,92 @@ OpenInfoLicenseMenu = function()
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:info:licenses')
+end
+
+OpenIDcardMenu = function()
+    local MENU = {}
+    local playerClos, playerDis = ESX.Game.GetClosestPlayer()
+    local ME = GetPlayerServerId(PlayerId())
+    local NEARBY
+
+    if playerClos ~= -1 and playerDis <= 5 then
+        NEARBY = GetPlayerServerId(playerClos)
+    end
+
+    MENU[#MENU + 1] = {
+        title = Strings.back,
+        onSelect = function()
+            OpenMainMenu()
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.idcard_view_title,
+        description = Strings.idcard_view_desc,
+        arrow = false,
+        onSelect = function()
+            TriggerServerEvent('jsfour-idcard:open', ME, ME)
+        end
+    }
+
+    if playerClos ~= -1 and playerDis <= 5 then
+        MENU[#MENU + 1] = {
+            title = Strings.idcard_show_title,
+            description = Strings.idcard_show_desc,
+            arrow = false,
+            onSelect = function()
+                TriggerServerEvent('jsfour-idcard:open', ME, NEARBY)
+            end
+        }
+    end
+
+    MENU[#MENU + 1] = {
+        title = Strings.driver_view_title,
+        description = Strings.driver_view_desc,
+        arrow = false,
+        onSelect = function()
+            TriggerServerEvent('jsfour-idcard:open', ME, ME, 'driver')
+        end
+    }
+
+    if playerClos ~= -1 and playerDis <= 5 then
+        MENU[#MENU + 1] = {
+            title = Strings.driver_show_title,
+            description = Strings.driver_show_desc,
+            arrow = false,
+            onSelect = function()
+                TriggerServerEvent('jsfour-idcard:open', ME, NEARBY, 'driver')
+            end
+        }
+    end
+
+    MENU[#MENU + 1] = {
+        title = Strings.weapon_view_title,
+        description = Strings.weapon_view_desc,
+        arrow = false,
+        onSelect = function()
+            TriggerServerEvent('jsfour-idcard:open', ME, ME, 'weapon')
+        end
+    }
+
+    if playerClos ~= -1 and playerDis <= 5 then
+        MENU[#MENU + 1] = {
+            title = Strings.weapon_show_title,
+            description = Strings.weapon_show_desc,
+            arrow = false,
+            onSelect = function()
+                TriggerServerEvent('jsfour-idcard:open', ME, NEARBY, 'weapon')
+            end
+        }
+    end
+
+    lib.registerContext({
+        id = 'zrx_personalmenu:personal_menu:idcard',
+        title = Strings.menu_idcard,
+        options = MENU,
+    })
+
+    lib.showContext('zrx_personalmenu:personal_menu:idcard')
 end
 
 DATA_ENGINE = true
