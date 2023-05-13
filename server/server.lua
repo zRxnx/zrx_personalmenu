@@ -1,6 +1,5 @@
 ESX = Config.esxImport()
 WEBHOOK = ''
-WEBHOOK = Protect(WEBHOOK)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerData', function(source)
     local xPlayer = ESX.GetPlayerFromId(source)
