@@ -63,7 +63,7 @@ Config.Server = {
 
 --| Place your checks here before the personal menu opens
 Config.CanOpen = function()
-    return true
+    return ESX.IsPlayerLoaded()
 end
 
 --| Place your checks here before the vehicle menu opens
@@ -78,6 +78,26 @@ Config.Notification = function(source, msg)
         xPlayer.showNotification(msg)
     else
         ESX.ShowNotification(msg)
+    end
+end
+
+Config.GiveVehicleKeys = function(source, vehicle)
+    local plate = GetVehicleNumberPlateText(vehicle)
+
+    if IsDuplicityVersion() then
+        exports.wasabi_carlock:GiveKeys(plate, source)
+    else
+        exports.wasabi_carlock:GiveKeys(plate)
+    end
+end
+
+Config.RemoveVehicleKeys = function(source, vehicle)
+    local plate = GetVehicleNumberPlateText(vehicle)
+
+    if IsDuplicityVersion() then
+        exports.wasabi_carlock:RemoveKeys(plate, source)
+    else
+        exports.wasabi_carlock:RemoveKeys(plate)
     end
 end
 

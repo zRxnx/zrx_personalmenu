@@ -13,6 +13,7 @@ Strings = {
     menu_info_lice = 'Personal menu - Informations licenses',
     menu_idcard = 'Personal menu - IDCard',
     menu_veh = 'Personal menu - Vehicle',
+    menu_veh_give = 'Personal menu - Give Vehicle',
     menu_veh_extra = 'Personal menu - Vehicle extras',
     menu_veh_livery = 'Personal menu - Vehicle liverys',
     menu_veh_lights = 'Personal menu - Vehicle lights',
@@ -100,6 +101,13 @@ Strings = {
 
     eng_title = 'Toggle Engine',
     eng_desc = 'Disable/Enable the engine',
+
+    give_title = 'Give vehicle',
+    give_desc = 'Give vehicle nearby player',
+
+    give_got = 'You have received a new vehicle from %s with the license plate %s!', --| arg1: RP Name - arg2: Plate
+    give_given = 'You gave your vehicle with the license plate %s to %s!', --| arg1: Plate - arg2: RP Name
+    give_cannot = 'The vehicle with the license plate %s does not belong to you!', --| arg1: Plate
 
     extra_title = 'Extras',
     extra_desc = 'Enable/Disable extras',
@@ -223,5 +231,5 @@ Strings = {
     bill_desc = 'Press to pay bill',
     bill_reason = 'Reason',
     bill_amount = 'Amount',
-    bill_amount_value = '$%s' --| arg1: Bill amount
+    bill_amount_value = '$%s', --| arg1: Bill amount
 }

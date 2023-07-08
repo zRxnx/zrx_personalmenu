@@ -110,7 +110,7 @@ OpenInfoMenu = function()
 
     local MENU = {}
     local PLAYER_DATA = lib.callback.await('zrx_personalmenu:server:getPlayerData', 500)
-    local SID = GetPlayerServerId(PlayerId())
+    local SID = GetPlayerServerId(cache.playerId)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -226,8 +226,8 @@ end
 
 OpenIDcardMenu = function()
     local MENU = {}
-    local playerClos, playerDis = ESX.Game.GetClosestPlayer()
-    local ME = GetPlayerServerId(PlayerId())
+    local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
+    local ME = GetPlayerServerId(cache.playerId)
     local NEARBY
 
     if playerClos ~= -1 and playerDis <= 5 then
@@ -401,6 +401,42 @@ OpenVehicleMenu = function()
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:vehicle')
+end
+
+OpenGiveVehicleMenu = function()
+    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
+        OpenMainMenu()
+        return
+    end
+
+    local MENU = {}
+    local vehicle = GetVehiclePedIsIn(cache.ped, false)
+
+    MENU[#MENU + 1] = {
+        title = Strings.give_title,
+        description = Strings.give_desc,
+        arrow = false,
+        onSelect = function()
+            local closPlayer = lib.getClosestPlayer(cache.coords, 5, false)
+
+            if closPlayer then
+                local svId = GetPlayerServerId(closPlayer)
+                local plate = GetVehicleNumberPlateText(vehicle)
+
+                TriggerServerEvent('zrx_personalmenu:server:giveCar', svId, plate)
+            else
+                Config.Notification(nil, Strings.no_nearby)
+            end
+        end
+    }
+
+    lib.registerContext({
+        id = 'zrx_personalmenu:personal_menu:give',
+        title = Strings.menu_veh_give,
+        options = MENU,
+    })
+
+    lib.showContext('zrx_personalmenu:personal_menu:give')
 end
 
 OpenVehicleExtrasMenu = function()
@@ -1014,7 +1050,7 @@ OpenCompanyMenu = function()
         description = Strings.company_hire_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = ESX.Game.GetClosestPlayer()
+            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
 
             if playerClos == -1 or playerDis > 5 then
                 Config.Notification(nil, Strings.no_nearby)
@@ -1029,7 +1065,7 @@ OpenCompanyMenu = function()
         description = Strings.company_fire_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = ESX.Game.GetClosestPlayer()
+            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
 
             if playerClos == -1 or playerDis > 5 then
                 Config.Notification(nil, Strings.no_nearby)
@@ -1044,7 +1080,7 @@ OpenCompanyMenu = function()
         description = Strings.company_promote_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = ESX.Game.GetClosestPlayer()
+            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
 
             if playerClos == -1 or playerDis > 5 then
                 Config.Notification(nil, Strings.no_nearby)
@@ -1059,7 +1095,7 @@ OpenCompanyMenu = function()
         description = Strings.company_derank_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = ESX.Game.GetClosestPlayer()
+            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
 
             if playerClos == -1 or playerDis > 5 then
                 Config.Notification(nil, Strings.no_nearby)

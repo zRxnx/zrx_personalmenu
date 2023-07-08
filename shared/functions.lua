@@ -1,20 +1,10 @@
 CreateThread(function()
     if Config.Menu.idcard then
-        if GetResourceState('jsfour-idcard'):find('missing') then
+        if GetResourceState('jsfour-idcard') == 'missing' then
             print('^0[^1ERROR^0] You enabled "Config.Menu.idcard" but "jsfour-idcard" is not on the server!')
         end
     end
 end)
-
-Protect = function(tbl)
-    return setmetatable({}, {
-        __index = tbl,
-        __newindex = function(t, key, value)
-            error("attempting to change constant " ..
-                   tostring(key) .. " to " .. tostring(value), 2)
-        end
-    })
-end
 
 StringSplit = function(str, sep)
     if not sep then

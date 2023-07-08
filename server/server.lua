@@ -10,10 +10,8 @@ end)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerBills', function(source)
     local xPlayer = ESX.GetPlayerFromId(source)
+    local results = MySQL.query.await('SELECT * FROM `billing` WHERE `identifier` = ?', { xPlayer.identifier })
     local BILLS = {}
-    local results = MySQL.Sync.fetchAll('SELECT * FROM billing WHERE identifier = @identifier', {
-        ['@identifier'] = xPlayer.identifier
-    })
 
     for k, data in pairs(results) do
         BILLS[#BILLS + 1] = {
@@ -29,9 +27,7 @@ end)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerLicenses', function(source)
     local xPlayer = ESX.GetPlayerFromId(source)
-    local results = MySQL.Sync.fetchAll('SELECT * FROM user_licenses WHERE owner = @owner', {
-        ['@owner'] = xPlayer.identifier
-    })
+    local results = MySQL.query.await('SELECT * FROM `user_licenses` WHERE `owner` = ?', { xPlayer.identifier })
     DiscordLog(xPlayer.source, 'LICENSES', ('Player %s (%s) requested their licenses'):format(GetPlayerName(xPlayer.source), xPlayer.source))
 
     return results
@@ -70,5 +66,26 @@ RegisterNetEvent('zrx_personalmenu:server:managePlayer', function(target, action
         Player.promote(xPlayer, yTarget)
     elseif action == 'derank' then
         Player.derank(xPlayer, yTarget)
+    end
+end)
+
+RegisterNetEvent('zrx_personalmenu:server:giveCar', function(target, plate)
+    if not target or not plate then return end
+	local xPlayer = ESX.GetPlayerFromId(source)
+
+    local row = MySQL.single.await('SELECT `plate` FROM `owned_vehicles` WHERE `plate` = ? LIMIT 1', { plate })
+
+    if row?.plate == plate then
+        local xTarget = ESX.GetPlayerFromId(target)
+
+        MySQL.update.await('UPDATE `owned_vehicles` SET `owner` = ? WHERE `plate` = ?', { xTarget.identifier, plate })
+
+        Config.GiveVehicleKeys(xTarget.source, plate)
+        Config.RemoveVehicleKeys(xPlayer.source, plate)
+
+        Config.Notification(xTarget.source, (Strings.give_got):format(xPlayer.getName(), plate))
+        Config.Notification(xPlayer.source, (Strings.give_given):format(plate, xTarget.getName()))
+    else
+        Config.Notification(xPlayer.source, (Strings.give_cannot):format(plate))
     end
 end)
