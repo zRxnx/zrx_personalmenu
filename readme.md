@@ -5,7 +5,7 @@ This is an advanced personal menu system for fivem
 <b>Features:</b>
 - Informations (RP Infos, Licenses, ...)
 - Settings (FPS Booster, Graphicmod)
-- Vehicles (Engine, Extra, Livery, Lights, Windows, Doors)
+- Vehicles (Engine, Extra, Livery, Lights, Windows, Doors, Give)
 - Bills (View, Pay)
 - Company (Society Infos, Hire, Fire, Promote, Derank)
 - Navigator (with Blips, multiple destination support)
