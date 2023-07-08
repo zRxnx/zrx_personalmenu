@@ -3,7 +3,7 @@ Config = {}
 
 --| Discord Webhook in 'server/server.lua'
 Config.Command = 'personalmenu' --| Command
-Config.Key = 'F5' --| Note: its a keyMapping
+Config.Key = 'F5' --| Note: Its a keymapping
 Config.Cooldown = 3 * seconds --| Note: Only for client > server or server > client | To disable set to 0
 Config.Menu = {
     informations = true,
@@ -20,6 +20,11 @@ Config.Company = {
     default = {
         job = 'unemployed', --| Job when you get fired
         grade = 0 --| Job grade when you get fired
+    },
+
+    allowedGrades = { --| grade names for company feature
+        ['boss'] = true,
+        ['co_boss'] = true,
     }
 }
 

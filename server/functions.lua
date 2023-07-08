@@ -3,7 +3,7 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if xJob.grade_name ~= 'boss' then
+        if IsGradeAllowed(xJob) then
             return
         elseif xJob.name == yJob.name then
             Config.Notification(xPlayer.source, (Strings.company_hire_already):format(yTarget.getName()))
@@ -21,7 +21,7 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if xJob.grade_name ~= 'boss' then
+        if IsGradeAllowed(xJob) then
             return
         elseif xJob.name == yJob.name then
             if ESX.DoesJobExist(Config.Company.default.job, Config.Company.default.grade) then
@@ -40,7 +40,7 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if xJob.grade_name ~= 'boss' then
+        if IsGradeAllowed(xJob) then
             return
         elseif xJob.name == yJob.name then
             local grade = yJob.grade + 1
@@ -61,7 +61,7 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if xJob.grade_name ~= 'boss' then
+        if IsGradeAllowed(xJob) then
             return
         elseif xJob.name == yJob.name then
             local grade = yJob.grade - 1
@@ -156,4 +156,8 @@ end
 PunishPlayer = function(player, reason)
     DiscordLog(player, 'PUNISH', reason)
     DropPlayer(player, reason)
+end
+
+IsGradeAllowed = function(job)
+    return Config.Company.allowedGrades[job.grade_name] or false
 end

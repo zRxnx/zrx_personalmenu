@@ -36,7 +36,7 @@ OpenMainMenu = function()
     end
 
     if Config.Menu.vehicle then
-        if GetVehiclePedIsIn(cache.ped, false) ~= 0 then
+        if (DoesEntityExist(cache.vehicle)) and GetPedInVehicleSeat(cache.vehicle, -1) == cache.ped then
             MENU[#MENU + 1] = {
                 title = Strings.veh_title,
                 description = Strings.veh_desc,
@@ -60,7 +60,7 @@ OpenMainMenu = function()
     end
 
     if Config.Menu.company then
-        if ESX.PlayerData.job.grade_name == 'boss' then
+        if IsGradeAllowed() then
             MENU[#MENU + 1] = {
                 title = Strings.company_title,
                 description = Strings.company_desc,
@@ -121,7 +121,7 @@ OpenInfoMenu = function()
 
     MENU[#MENU + 1] = {
         title = Strings.player_title,
-        description = (Strings.player_desc):format(SID, GetPlayerName(PlayerId()), PLAYER_DATA.ping),
+        description = (Strings.player_desc):format(SID, GetPlayerName(cache.playerId), PLAYER_DATA.ping),
         arrow = false,
     }
 
@@ -312,7 +312,7 @@ end
 
 DATA_ENGINE = true
 OpenVehicleMenu = function()
-    if GetVehiclePedIsIn(cache.ped, false) == 0 then
+    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
         OpenMainMenu()
         return
     end
@@ -333,13 +333,18 @@ OpenVehicleMenu = function()
         arrow = false,
         onSelect = function()
             if DATA_ENGINE then
-                SetVehicleEngineOn(vehicle, false, false, false)
-                SetVehicleUndriveable(vehicle, true)
                 DATA_ENGINE = false
+
+                while not DATA_ENGINE and DoesEntityExist(vehicle) and GetPedInVehicleSeat(vehicle, -1) == cache.ped do
+                    SetVehicleEngineOn(vehicle, false, false, false)
+                    SetVehicleUndriveable(vehicle, true)
+                    Wait()
+                end
             else
+                DATA_ENGINE = true
+
                 SetVehicleEngineOn(vehicle, true, false, false)
                 SetVehicleUndriveable(vehicle, false)
-                DATA_ENGINE = true
             end
         end
     }
@@ -399,7 +404,7 @@ OpenVehicleMenu = function()
 end
 
 OpenVehicleExtrasMenu = function()
-    if GetVehiclePedIsIn(cache.ped, false) == 0 then
+    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
         OpenMainMenu()
         return
     elseif not Config.CanOpenExtras() then
@@ -448,7 +453,7 @@ OpenVehicleExtrasMenu = function()
 end
 
 OpenVehicleLiveryMenu = function()
-    if GetVehiclePedIsIn(cache.ped, false) == 0 then
+    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
         OpenMainMenu()
         return
     end
@@ -492,7 +497,7 @@ DATA_LIGHTS = {
     neon = true
 }
 OpenVehicleLightsMenu = function()
-    if GetVehiclePedIsIn(cache.ped, false) == 0 then
+    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
         OpenMainMenu()
         return
     end
@@ -568,7 +573,7 @@ DATA_WINDOWS = {
     back_right = false
 }
 OpenVehicleWindowMenu = function()
-    if GetVehiclePedIsIn(cache.ped, false) == 0 then
+    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
         OpenMainMenu()
         return
     end
@@ -689,7 +694,7 @@ DATA_DOORS = {
     trunk = false
 }
 OpenVehicleDoorsMenu = function()
-    if GetVehiclePedIsIn(cache.ped, false) == 0 then
+    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
         OpenMainMenu()
         return
     end
@@ -983,7 +988,7 @@ OpenCompanyMenu = function()
     end
     StartCooldown()
 
-    if ESX.PlayerData.job.grade_name ~= 'boss' then
+    if not IsGradeAllowed() then
         OpenMainMenu()
         return
     end
@@ -1134,4 +1139,8 @@ StartCooldown = function()
     SetTimeout(Config.Cooldown, function()
         COOLDOWN = false
     end)
+end
+
+IsGradeAllowed = function()
+    return Config.Company.allowedGrades[ESX.PlayerData.job.grade_name] or false
 end
