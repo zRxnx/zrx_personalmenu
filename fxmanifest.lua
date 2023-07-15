@@ -5,7 +5,7 @@ use_experimental_fxv2_oal 'yes'
 
 author 'zRxnx'
 description 'Advanced personal menu system'
-version '1.2.1'
+version '1.3.0'
 
 shared_scripts {
     '@ox_lib/init.lua',

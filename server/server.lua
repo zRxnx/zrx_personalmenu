@@ -5,7 +5,16 @@ lib.callback.register('zrx_personalmenu:server:getPlayerData', function(source)
     local xPlayer = ESX.GetPlayerFromId(source)
     DiscordLog(xPlayer.source, 'PLAYERDATA', ('Player %s (%s) requested their data'):format(GetPlayerName(xPlayer.source), xPlayer.source))
 
-    return { job = xPlayer.getJob(), name = xPlayer.getName(), bank = xPlayer.getAccount('bank').money, money = xPlayer.getAccount('money').money, black_money = xPlayer.getAccount('black_money').money, ping = GetPlayerPing(xPlayer.source) }
+    return {
+        job = xPlayer.getJob(),
+        name = xPlayer.getName(),
+        dob = xPlayer.variables.dateofbirth,
+        height = xPlayer.variables.height,
+        bank = xPlayer.getAccount(Config.ESXAccounts.bank).money,
+        money = xPlayer.getAccount(Config.ESXAccounts.money).money,
+        black_money = xPlayer.getAccount(Config.ESXAccounts.black_money).money,
+        ping = GetPlayerPing(xPlayer.source)
+    }
 end)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerBills', function(source)
@@ -45,10 +54,10 @@ end)
 RegisterNetEvent('zrx_personalmenu:server:managePlayer', function(target, action)
     action = action:lower()
     if action ~= 'hire' and action ~= 'fire' and action ~= 'promote' and action ~= 'derank' then
-        PunishPlayer(source, 'Tried to trigger "zrx_personalmenu:server:managePlayer"')
+        Config.PunishPlayer(source, 'Tried to trigger "zrx_personalmenu:server:managePlayer"')
         return
     elseif type(target) ~= 'number' then
-        PunishPlayer(source, 'Tried to trigger "zrx_personalmenu:server:managePlayer"')
+        Config.PunishPlayer(source, 'Tried to trigger "zrx_personalmenu:server:managePlayer"')
         return
     elseif source == target then
         DiscordLog(source, 'MANAGEPLAYER', ('Player %s (%s) tried to manage themself'):format(GetPlayerName(xPlayer.source), xPlayer.source))

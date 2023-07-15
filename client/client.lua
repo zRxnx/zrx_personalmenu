@@ -1,32 +1,7 @@
 ESX, COOLDOWN = Config.esxImport(), nil
 local GetEntityCoords = GetEntityCoords
-local DisableOcclusionThisFrame = DisableOcclusionThisFrame
-local SetDisableDecalRenderingThisFrame = SetDisableDecalRenderingThisFrame
-local RemoveParticleFxInRange = RemoveParticleFxInRange
-local OverrideLodscaleThisFrame = OverrideLodscaleThisFrame
-local SetArtificialLightsState = SetArtificialLightsState
-local ClearAllBrokenGlass = ClearAllBrokenGlass
-local LeaderboardsReadClearAll = LeaderboardsReadClearAll
-local ClearBrief = ClearBrief
-local ClearGpsFlags = ClearGpsFlags
-local ClearPrints = ClearPrints
-local ClearSmallPrints = ClearSmallPrints
-local ClearReplayStats = ClearReplayStats
-local LeaderboardsClearCacheData = LeaderboardsClearCacheData
-local ClearFocus = ClearFocus
-local ClearHdArea = ClearHdArea
-local ClearPedBloodDamage = ClearPedBloodDamage
-local ClearPedWetness = ClearPedWetness
-local ClearPedEnvDirt = ClearPedEnvDirt
-local ResetPedVisibleDamage = ResetPedVisibleDamage
-local ClearPedLastWeaponDamage = ClearPedLastWeaponDamage
-local ClearExtraTimecycleModifier = ClearExtraTimecycleModifier
-local ClearTimecycleModifier = ClearTimecycleModifier
-local ClearOverrideWeather = ClearOverrideWeather
-local DisableVehicleDistantlights = DisableVehicleDistantlights
-local DisableScreenblurFade = DisableScreenblurFade
-local SetRainLevel = SetRainLevel
-local SetWindSpeed = SetWindSpeed
+local SetBlipRoute = SetBlipRoute
+local RemoveBlip = RemoveBlip
 
 RegisterNetEvent('esx:playerLoaded',function(xPlayer)
     ESX.PlayerData = xPlayer
@@ -37,56 +12,17 @@ RegisterNetEvent('esx:setJob', function(job)
 end)
 
 RegisterCommand(Config.Command, function()
-    if not Config.CanOpen() then return end
+    if not Config.CanOpenMenu() then return end
 
     OpenMainMenu()
 end)
 RegisterKeyMapping(Config.Command, Strings.cmd_desc, 'keyboard', Config.Key)
 TriggerEvent('chat:addSuggestion', ('/%s'):format(Config.Command), Strings.cmd_desc, {})
 
-CreateThread(function()
-    local pedCoords
-    ::loop::
-        if DATA_SETTINGS.booster then
-            pedCoords = GetEntityCoords(cache.ped)
-            DisableOcclusionThisFrame()
-            SetDisableDecalRenderingThisFrame()
-            RemoveParticleFxInRange(vector3(pedCoords.x, pedCoords.y, pedCoords.z), 10.0)
-            OverrideLodscaleThisFrame(0.4)
-            SetArtificialLightsState(true)
-            ClearAllBrokenGlass()
-            LeaderboardsReadClearAll()
-            ClearBrief()
-            ClearGpsFlags()
-            ClearPrints()
-            ClearSmallPrints()
-            ClearReplayStats()
-            LeaderboardsClearCacheData()
-            ClearFocus()
-            ClearHdArea()
-            ClearPedBloodDamage(cache.ped)
-            ClearPedWetness(cache.ped)
-            ClearPedEnvDirt(cache.ped)
-            ResetPedVisibleDamage(cache.ped)
-            ClearPedLastWeaponDamage(cache.ped)
-            ClearExtraTimecycleModifier()
-            ClearTimecycleModifier()
-            ClearOverrideWeather()
-            DisableVehicleDistantlights(false)
-            DisableScreenblurFade()
-            SetRainLevel(0.0)
-            SetWindSpeed(0.0)
-            Wait()
-        else
-            Wait(2000)
-        end
-    goto loop
-end)
-
 DATA_ROUTE = {}
 CreateThread(function()
     local pedCoords
-    ::loop::
+    while true do
         pedCoords = GetEntityCoords(cache.ped)
         for k, data in pairs(DATA_ROUTE) do
             if data.time - 1 < 1 then
@@ -106,5 +42,13 @@ CreateThread(function()
             end
         end
         Wait(1000)
-    goto loop
+    end
+end)
+
+exports('openMenu', OpenMainMenu)
+exports('getCooldown', function()
+    return COOLDOWN
+end)
+exports('getConfig', function()
+    return Config
 end)

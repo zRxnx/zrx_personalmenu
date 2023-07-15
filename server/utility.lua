@@ -1,3 +1,4 @@
+if not Config.CheckForUpdates then return end
 local curResName = GetCurrentResourceName()
 local curVersion = GetResourceMetadata(curResName, 'version')
 local resourceName = 'zrx_personalmenu'

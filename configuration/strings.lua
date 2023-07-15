@@ -219,6 +219,8 @@ Strings = {
     company_higher = 'There is no higher grade!',
     company_lower = 'There is no lower grade!',
 
+    company_not_same = 'You are not in the same company',
+
     navi_desc2 = 'Press to set waypoint',
     navi_dest = 'Destination: %s', --| arg1: Destination name
 

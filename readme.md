@@ -2,8 +2,8 @@
 
 This is an advanced personal menu system for fivem
 
-<b>Features:</b>
-- Informations (RP Infos, Licenses, ...)
+<b>Features</b>
+- Informations (Character Infos, Licenses, ...)
 - Settings (FPS Booster, Graphicmod)
 - Vehicles (Engine, Extra, Livery, Lights, Windows, Doors, Give)
 - Bills (View, Pay)
@@ -16,10 +16,16 @@ This is an advanced personal menu system for fivem
 - 0.0 ms on idle
 - 0.0 ms while in use
 
+<b>Exports</b>
+- openMenu
+- getCooldown
+- getConfig
+
 ## Requirements
 - es_extended
 - ox_lib
-- esx_addonaccount (optional; for company)
+- esx_addonaccount (optional)
+- Carlock script (optional)
 
 ## Preview
 - Discord log: https://prnt.sc/fTfRhk3RmK80

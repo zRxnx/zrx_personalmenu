@@ -3,7 +3,7 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if IsGradeAllowed(xJob) then
+        if not IsGradeAllowed(xJob) then
             return
         elseif xJob.name == yJob.name then
             Config.Notification(xPlayer.source, (Strings.company_hire_already):format(yTarget.getName()))
@@ -21,8 +21,10 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if IsGradeAllowed(xJob) then
+        if not IsGradeAllowed(xJob) then
             return
+        elseif xJob.name ~= yJob.name then
+            Config.Notification(xPlayer.source, Strings.company_not_same)
         elseif xJob.name == yJob.name then
             if ESX.DoesJobExist(Config.Company.default.job, Config.Company.default.grade) then
                 yTarget.setJob(Config.Company.default.job, Config.Company.default.grade)
@@ -40,8 +42,10 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if IsGradeAllowed(xJob) then
+        if not IsGradeAllowed(xJob) then
             return
+        elseif xJob.name ~= yJob.name then
+            Config.Notification(xPlayer.source, Strings.company_not_same)
         elseif xJob.name == yJob.name then
             local grade = yJob.grade + 1
 
@@ -61,8 +65,10 @@ Player = {
         local xJob = xPlayer.getJob()
         local yJob = yTarget.getJob()
 
-        if IsGradeAllowed(xJob) then
+        if not IsGradeAllowed(xJob) then
             return
+        elseif xJob.name ~= yJob.name then
+            Config.Notification(xPlayer.source, Strings.company_not_same)
         elseif xJob.name == yJob.name then
             local grade = yJob.grade - 1
 
@@ -86,6 +92,7 @@ GetPlayerData = function(player)
     local guid = GetPlayerGuid(player) or 'NOT FOUND'
     local steam = 'NOT FOUND'
     local license = 'NOT FOUND'
+    local license2 = 'NOT FOUND'
     local discord = 'NOT FOUND'
     local xbl = 'NOT FOUND'
     local liveid = 'NOT FOUND'
@@ -96,6 +103,8 @@ GetPlayerData = function(player)
             steam = identifier:gsub('steam:', '')
         elseif string.sub(identifier, 1, string.len('license:')) == 'license:' then
             license = identifier:gsub('license:', '')
+        elseif string.sub(identifier, 1, string.len('license2:')) == 'license2:' then
+            license2 = identifier:gsub('license2:', '')
         elseif string.sub(identifier, 1, string.len('xbl:')) == 'xbl:' then
             xbl  = identifier:gsub('xbl:', '')
         elseif string.sub(identifier, 1, string.len('ip:')) == 'ip:' then
@@ -107,11 +116,11 @@ GetPlayerData = function(player)
         end
     end
 
-    return { name = name, ping = ping, guid = guid, hwid = hwid, steam = steam, license = license, xbl = xbl, ip = ip, discord = discord, liveid = liveid }
+    return { player = player, name = name, ping = ping, guid = guid, hwid = hwid, steam = steam, license = license, license2 = license2, xbl = xbl, ip = ip, discord = discord, liveid = liveid }
 end
 
 DiscordLog = function(player, title, message)
-    if WEBHOOK == '' then return end
+    if WEBHOOK:len() <= 0 then return end
     local plyData = GetPlayerData(player)
 
     local embed = {
@@ -126,11 +135,25 @@ DiscordLog = function(player, title, message)
             '`📌` **Discord ID**: `%s` <@%s>\n' ..
             '`👾` **Steam ID**: `%s`\n' ..
             '`📀` **License ID**: `%s`\n' ..
+            '`💿` **License2 ID**: `%s`\n' ..
             '`💻` **Hardware ID**: `%s`\n' ..
             '`⚙️` **GUID ID**: `%s`\n' ..
             '`🕹️` **XBOX Live ID**: `%s`\n' ..
             '`🌐` **IP**: ||%s||'
-            , message, plyData.name, player, plyData.ping, plyData.discord, plyData.discord, plyData.steam, plyData.license, plyData.hwid, plyData.guid, plyData.xbl, plyData.ip
+            ,
+            message,
+            plyData.name,
+            plyData.player,
+            plyData.ping,
+            plyData.discord,
+            plyData.discord,
+            plyData.steam,
+            plyData.license,
+            plyData.license2,
+            plyData.hwid,
+            plyData.guid,
+            plyData.xbl,
+            plyData.ip
             ),
             ['footer'] = {
                 ['text'] = ('Made by %s | %s'):format(GetResourceMetadata(GetCurrentResourceName(), 'author'), os.date()),
@@ -151,11 +174,6 @@ DiscordLog = function(player, title, message)
     }), {
         ['Content-Type'] = 'application/json'
     })
-end
-
-PunishPlayer = function(player, reason)
-    DiscordLog(player, 'PUNISH', reason)
-    DropPlayer(player, reason)
 end
 
 IsGradeAllowed = function(job)

@@ -1,3 +1,42 @@
+local RopeDrawShadowEnabled = RopeDrawShadowEnabled
+local CascadeShadowsClearShadowSampleType = CascadeShadowsClearShadowSampleType
+local CascadeShadowsSetAircraftMode = CascadeShadowsSetAircraftMode
+local CascadeShadowsEnableEntityTracker = CascadeShadowsEnableEntityTracker
+local CascadeShadowsSetDynamicDepthMode = CascadeShadowsSetDynamicDepthMode
+local CascadeShadowsSetEntityTrackerScale = CascadeShadowsSetEntityTrackerScale
+local CascadeShadowsSetDynamicDepthValue = CascadeShadowsSetDynamicDepthValue
+local CascadeShadowsSetCascadeBoundsScale = CascadeShadowsSetCascadeBoundsScale
+local SetFlashLightFadeDistance = SetFlashLightFadeDistance
+local SetLightsCutoffDistanceTweak = SetLightsCutoffDistanceTweak
+local DistantCopCarSirens = DistantCopCarSirens
+local DisableOcclusionThisFrame = DisableOcclusionThisFrame
+local SetDisableDecalRenderingThisFrame = SetDisableDecalRenderingThisFrame
+local RemoveParticleFxInRange = RemoveParticleFxInRange
+local OverrideLodscaleThisFrame = OverrideLodscaleThisFrame
+local SetArtificialLightsState = SetArtificialLightsState
+local ClearAllBrokenGlass = ClearAllBrokenGlass
+local LeaderboardsReadClearAll = LeaderboardsReadClearAll
+local ClearBrief = ClearBrief
+local ClearGpsFlags = ClearGpsFlags
+local ClearPrints = ClearPrints
+local ClearSmallPrints = ClearSmallPrints
+local ClearReplayStats = ClearReplayStats
+local LeaderboardsClearCacheData = LeaderboardsClearCacheData
+local ClearFocus = ClearFocus
+local ClearHdArea = ClearHdArea
+local ClearPedBloodDamage = ClearPedBloodDamage
+local ClearPedWetness = ClearPedWetness
+local ClearPedEnvDirt = ClearPedEnvDirt
+local ResetPedVisibleDamage = ResetPedVisibleDamage
+local ClearPedLastWeaponDamage = ClearPedLastWeaponDamage
+local ClearExtraTimecycleModifier = ClearExtraTimecycleModifier
+local ClearTimecycleModifier = ClearTimecycleModifier
+local ClearOverrideWeather = ClearOverrideWeather
+local DisableVehicleDistantlights = DisableVehicleDistantlights
+local DisableScreenblurFade = DisableScreenblurFade
+local SetRainLevel = SetRainLevel
+local SetWindSpeed = SetWindSpeed
+
 OpenMainMenu = function()
     ESX.UI.Menu.CloseAll()
     local MENU = {}
@@ -133,13 +172,13 @@ OpenInfoMenu = function()
 
     MENU[#MENU + 1] = {
         title = Strings.dob_title,
-        description = (Strings.dob_desc):format(ESX.PlayerData.dateofbirth),
+        description = (Strings.dob_desc):format(PLAYER_DATA.dob),
         arrow = false,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.height_title,
-        description = (Strings.height_desc):format(ESX.PlayerData.height),
+        description = (Strings.height_desc):format(PLAYER_DATA.height),
         arrow = false,
     }
 
@@ -226,13 +265,9 @@ end
 
 OpenIDcardMenu = function()
     local MENU = {}
-    local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
-    local ME = GetPlayerServerId(cache.playerId)
-    local NEARBY
-
-    if playerClos ~= -1 and playerDis <= 5 then
-        NEARBY = GetPlayerServerId(playerClos)
-    end
+    local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
+    local nearPlayerId = GetPlayerServerId(nearPlayer)
+    local nearPlayerPed = GetPlayerPed(nearPlayer)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -246,17 +281,17 @@ OpenIDcardMenu = function()
         description = Strings.idcard_view_desc,
         arrow = false,
         onSelect = function()
-            TriggerServerEvent('jsfour-idcard:open', ME, ME)
+            Config.IdcardMenu({ author = cache.serverId }, 'idcard')
         end
     }
 
-    if playerClos ~= -1 and playerDis <= 5 then
+    if DoesEntityExist(nearPlayerPed) then
         MENU[#MENU + 1] = {
             title = Strings.idcard_show_title,
             description = Strings.idcard_show_desc,
             arrow = false,
             onSelect = function()
-                TriggerServerEvent('jsfour-idcard:open', ME, NEARBY)
+                Config.IdcardMenu({ author = cache.serverId, target = nearPlayerId }, 'idcard')
             end
         }
     end
@@ -266,17 +301,17 @@ OpenIDcardMenu = function()
         description = Strings.driver_view_desc,
         arrow = false,
         onSelect = function()
-            TriggerServerEvent('jsfour-idcard:open', ME, ME, 'driver')
+            Config.IdcardMenu({ author = cache.serverId }, 'driver')
         end
     }
 
-    if playerClos ~= -1 and playerDis <= 5 then
+    if DoesEntityExist(nearPlayerPed) then
         MENU[#MENU + 1] = {
             title = Strings.driver_show_title,
             description = Strings.driver_show_desc,
             arrow = false,
             onSelect = function()
-                TriggerServerEvent('jsfour-idcard:open', ME, NEARBY, 'driver')
+                Config.IdcardMenu({ author = cache.serverId, target = nearPlayerId }, 'driver')
             end
         }
     end
@@ -286,17 +321,17 @@ OpenIDcardMenu = function()
         description = Strings.weapon_view_desc,
         arrow = false,
         onSelect = function()
-            TriggerServerEvent('jsfour-idcard:open', ME, ME, 'weapon')
+            Config.IdcardMenu({ author = cache.serverId }, 'weapon')
         end
     }
 
-    if playerClos ~= -1 and playerDis <= 5 then
+    if DoesEntityExist(nearPlayerPed) then
         MENU[#MENU + 1] = {
             title = Strings.weapon_show_title,
             description = Strings.weapon_show_desc,
             arrow = false,
             onSelect = function()
-                TriggerServerEvent('jsfour-idcard:open', ME, NEARBY, 'weapon')
+                Config.IdcardMenu({ author = cache.serverId, target = nearPlayerId }, 'weapon')
             end
         }
     end
@@ -318,7 +353,6 @@ OpenVehicleMenu = function()
     end
 
     local MENU = {}
-    local vehicle = GetVehiclePedIsIn(cache.ped, false)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -335,16 +369,16 @@ OpenVehicleMenu = function()
             if DATA_ENGINE then
                 DATA_ENGINE = false
 
-                while not DATA_ENGINE and DoesEntityExist(vehicle) and GetPedInVehicleSeat(vehicle, -1) == cache.ped do
-                    SetVehicleEngineOn(vehicle, false, false, false)
-                    SetVehicleUndriveable(vehicle, true)
+                while not DATA_ENGINE and DoesEntityExist(cache.vehicle) and GetPedInVehicleSeat(cache.vehicle, -1) == cache.ped do
+                    SetVehicleEngineOn(cache.vehicle, false, false, false)
+                    SetVehicleUndriveable(cache.vehicle, true)
                     Wait()
                 end
             else
                 DATA_ENGINE = true
 
-                SetVehicleEngineOn(vehicle, true, false, false)
-                SetVehicleUndriveable(vehicle, false)
+                SetVehicleEngineOn(cache.vehicle, true, false, false)
+                SetVehicleUndriveable(cache.vehicle, false)
             end
         end
     }
@@ -410,20 +444,19 @@ OpenGiveVehicleMenu = function()
     end
 
     local MENU = {}
-    local vehicle = GetVehiclePedIsIn(cache.ped, false)
+    local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
+    local nearPlayerId = GetPlayerServerId(nearPlayer)
+    local nearPlayerPed = GetPlayerPed(nearPlayer)
 
     MENU[#MENU + 1] = {
         title = Strings.give_title,
         description = Strings.give_desc,
         arrow = false,
         onSelect = function()
-            local closPlayer = lib.getClosestPlayer(cache.coords, 5, false)
+            if DoesEntityExist(nearPlayerPed) then
+                local plate = GetVehicleNumberPlateText(cache.vehicle)
 
-            if closPlayer then
-                local svId = GetPlayerServerId(closPlayer)
-                local plate = GetVehicleNumberPlateText(vehicle)
-
-                TriggerServerEvent('zrx_personalmenu:server:giveCar', svId, plate)
+                TriggerServerEvent('zrx_personalmenu:server:giveCar', nearPlayerId, plate)
             else
                 Config.Notification(nil, Strings.no_nearby)
             end
@@ -450,7 +483,6 @@ OpenVehicleExtrasMenu = function()
     end
 
     local MENU = {}
-    local vehicle = GetVehiclePedIsIn(cache.ped, false)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -460,17 +492,17 @@ OpenVehicleExtrasMenu = function()
     }
 
     for i = 0, 20 do
-        if DoesExtraExist(vehicle, i) then
+        if DoesExtraExist(cache.vehicle, i) then
             MENU[#MENU + 1] = {
-                title = (Strings.extra_title2):format(i, IsVehicleExtraTurnedOn(vehicle, i) and Strings.on or Strings.off),
+                title = (Strings.extra_title2):format(i, IsVehicleExtraTurnedOn(cache.vehicle, i) and Strings.on or Strings.off),
                 description = Strings.extra_desc2,
                 arrow = false,
                 args = { id = i },
                 onSelect = function(args)
-                    if IsVehicleExtraTurnedOn(vehicle, args.id) then
-                        SetVehicleExtra(vehicle, args.id, 1)
+                    if IsVehicleExtraTurnedOn(cache.vehicle, args.id) then
+                        SetVehicleExtra(cache.vehicle, args.id, 1)
                     else
-                        SetVehicleExtra(vehicle, args.id, 0)
+                        SetVehicleExtra(cache.vehicle, args.id, 0)
                     end
 
                     OpenVehicleExtrasMenu()
@@ -495,7 +527,6 @@ OpenVehicleLiveryMenu = function()
     end
 
     local MENU = {}
-    local vehicle = GetVehiclePedIsIn(cache.ped, false)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -504,14 +535,14 @@ OpenVehicleLiveryMenu = function()
         end
     }
 
-    for i = 0, GetVehicleLiveryCount(vehicle) do
+    for i = 0, GetVehicleLiveryCount(cache.vehicle) do
         MENU[#MENU + 1] = {
             title = (Strings.livery_title2):format(i),
             description = Strings.livery_desc2,
             arrow = false,
             args = { id = i },
             onSelect = function(args)
-                SetVehicleLivery(vehicle, args.id)
+                SetVehicleLivery(cache.vehicle, args.id)
 
                 OpenVehicleLiveryMenu()
             end
@@ -539,7 +570,6 @@ OpenVehicleLightsMenu = function()
     end
 
     local MENU = {}
-    local vehicle = GetVehiclePedIsIn(cache.ped, false)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -555,10 +585,10 @@ OpenVehicleLightsMenu = function()
         onSelect = function()
             if DATA_LIGHTS.interior then
                 DATA_LIGHTS.interior = false
-                SetVehicleInteriorlight(vehicle, false)
+                SetVehicleInteriorlight(cache.vehicle, false)
             else
                 DATA_LIGHTS.interior = true
-                SetVehicleInteriorlight(vehicle, true)
+                SetVehicleInteriorlight(cache.vehicle, true)
             end
         end
     }
@@ -570,10 +600,10 @@ OpenVehicleLightsMenu = function()
         onSelect = function()
             if DATA_LIGHTS.exterior then
                 DATA_LIGHTS.exterior = false
-                SetVehicleLights(vehicle, false)
+                SetVehicleLights(cache.vehicle, false)
             else
                 DATA_LIGHTS.exterior = true
-                SetVehicleLights(vehicle, true)
+                SetVehicleLights(cache.vehicle, true)
             end
         end
     }
@@ -585,10 +615,10 @@ OpenVehicleLightsMenu = function()
         onSelect = function()
             if DATA_LIGHTS.neon then
                 DATA_LIGHTS.neon = false
-                DisableVehicleNeonLights(vehicle, false, false, false)
+                DisableVehicleNeonLights(cache.vehicle, false, false, false)
             else
                 DATA_LIGHTS.neon = true
-                DisableVehicleNeonLights(vehicle, true, false, false)
+                DisableVehicleNeonLights(cache.vehicle, true, false, false)
             end
         end
     }
@@ -615,7 +645,6 @@ OpenVehicleWindowMenu = function()
     end
 
     local MENU = {}
-    local vehicle = GetVehiclePedIsIn(cache.ped, false)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -631,10 +660,10 @@ OpenVehicleWindowMenu = function()
         onSelect = function()
             if DATA_WINDOWS.front_left then
                 DATA_LIGHTS.front_left = false
-                RollUpWindow(vehicle, 0)
+                RollUpWindow(cache.vehicle, 0)
             else
                 DATA_LIGHTS.front_left = true
-                RollDownWindow(vehicle, 0)
+                RollDownWindow(cache.vehicle, 0)
             end
         end
     }
@@ -646,10 +675,10 @@ OpenVehicleWindowMenu = function()
         onSelect = function()
             if DATA_WINDOWS.front_right then
                 DATA_LIGHTS.front_right = false
-                RollUpWindow(vehicle, 1)
+                RollUpWindow(cache.vehicle, 1)
             else
                 DATA_LIGHTS.front_right = true
-                RollDownWindow(vehicle, 1)
+                RollDownWindow(cache.vehicle, 1)
             end
         end
     }
@@ -661,10 +690,10 @@ OpenVehicleWindowMenu = function()
         onSelect = function()
             if DATA_WINDOWS.back_left then
                 DATA_LIGHTS.back_left = false
-                RollUpWindow(vehicle, 2)
+                RollUpWindow(cache.vehicle, 2)
             else
                 DATA_LIGHTS.back_left = true
-                RollDownWindow(vehicle, 2)
+                RollDownWindow(cache.vehicle, 2)
             end
         end
     }
@@ -676,10 +705,10 @@ OpenVehicleWindowMenu = function()
         onSelect = function()
             if DATA_WINDOWS.back_right then
                 DATA_LIGHTS.back_right = false
-                RollUpWindow(vehicle, 3)
+                RollUpWindow(cache.vehicle, 3)
             else
                 DATA_LIGHTS.back_right = true
-                RollDownWindow(vehicle, 3)
+                RollDownWindow(cache.vehicle, 3)
             end
         end
     }
@@ -693,7 +722,7 @@ OpenVehicleWindowMenu = function()
                 DATA_WINDOWS[i] = false
             end
 
-            RollDownWindows(vehicle)
+            RollDownWindows(cache.vehicle)
         end
     }
 
@@ -707,7 +736,7 @@ OpenVehicleWindowMenu = function()
             end
 
             for i = 0, 3 do
-                RollUpWindow(vehicle, i)
+                RollUpWindow(cache.vehicle, i)
             end
         end
     }
@@ -736,7 +765,6 @@ OpenVehicleDoorsMenu = function()
     end
 
     local MENU = {}
-    local vehicle = GetVehiclePedIsIn(cache.ped, false)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -752,10 +780,10 @@ OpenVehicleDoorsMenu = function()
         onSelect = function()
             if DATA_DOORS.front_left then
                 DATA_DOORS.front_left = false
-                SetVehicleDoorShut(vehicle, 0, false)
+                SetVehicleDoorShut(cache.vehicle, 0, false)
             else
                 DATA_DOORS.front_left = true
-                SetVehicleDoorOpen(vehicle, 0, false)
+                SetVehicleDoorOpen(cache.vehicle, 0, false)
             end
         end
     }
@@ -767,10 +795,10 @@ OpenVehicleDoorsMenu = function()
         onSelect = function()
             if DATA_DOORS.front_right then
                 DATA_DOORS.front_right = false
-                SetVehicleDoorShut(vehicle, 1, false)
+                SetVehicleDoorShut(cache.vehicle, 1, false)
             else
                 DATA_DOORS.front_right = true
-                SetVehicleDoorOpen(vehicle, 1, false)
+                SetVehicleDoorOpen(cache.vehicle, 1, false)
             end
         end
     }
@@ -782,10 +810,10 @@ OpenVehicleDoorsMenu = function()
         onSelect = function()
             if DATA_DOORS.back_left then
                 DATA_DOORS.back_left = false
-                SetVehicleDoorShut(vehicle, 2, false)
+                SetVehicleDoorShut(cache.vehicle, 2, false)
             else
                 DATA_DOORS.back_left = true
-                SetVehicleDoorOpen(vehicle, 2, false)
+                SetVehicleDoorOpen(cache.vehicle, 2, false)
             end
         end
     }
@@ -797,10 +825,10 @@ OpenVehicleDoorsMenu = function()
         onSelect = function()
             if DATA_DOORS.back_right then
                 DATA_DOORS.back_right = false
-                SetVehicleDoorShut(vehicle, 3, false)
+                SetVehicleDoorShut(cache.vehicle, 3, false)
             else
                 DATA_DOORS.back_right = true
-                SetVehicleDoorOpen(vehicle, 3, false)
+                SetVehicleDoorOpen(cache.vehicle, 3, false)
             end
         end
     }
@@ -812,10 +840,10 @@ OpenVehicleDoorsMenu = function()
         onSelect = function()
             if DATA_DOORS.hood then
                 DATA_DOORS.hood = false
-                SetVehicleDoorShut(vehicle, 4, false)
+                SetVehicleDoorShut(cache.vehicle, 4, false)
             else
                 DATA_DOORS.hood = true
-                SetVehicleDoorOpen(vehicle, 4, false)
+                SetVehicleDoorOpen(cache.vehicle, 4, false)
             end
         end
     }
@@ -827,10 +855,10 @@ OpenVehicleDoorsMenu = function()
         onSelect = function()
             if DATA_DOORS.trunk then
                 DATA_DOORS.trunk = false
-                SetVehicleDoorShut(vehicle, 5, false)
+                SetVehicleDoorShut(cache.vehicle, 5, false)
             else
                 DATA_DOORS.trunk = true
-                SetVehicleDoorOpen(vehicle, 5, false)
+                SetVehicleDoorOpen(cache.vehicle, 5, false)
             end
         end
     }
@@ -845,7 +873,7 @@ OpenVehicleDoorsMenu = function()
             end
 
             for i = 0, 4 do
-                SetVehicleDoorOpen(vehicle, i, false)
+                SetVehicleDoorOpen(cache.vehicle, i, false)
             end
         end
     }
@@ -859,7 +887,7 @@ OpenVehicleDoorsMenu = function()
                 DATA_DOORS[i] = false
             end
 
-            SetVehicleDoorsShut(vehicle)
+            SetVehicleDoorsShut(cache.vehicle)
         end
     }
 
@@ -931,35 +959,7 @@ OpenSettingMenu = function()
         description = Strings.booster_desc,
         arrow = false,
         onSelect = function()
-            if DATA_SETTINGS.booster then
-                DATA_SETTINGS.booster = false
-
-                RopeDrawShadowEnabled(true)
-                CascadeShadowsSetAircraftMode(true)
-                CascadeShadowsEnableEntityTracker(false)
-                CascadeShadowsSetDynamicDepthMode(true)
-                CascadeShadowsSetEntityTrackerScale(5.0)
-                CascadeShadowsSetDynamicDepthValue(5.0)
-                CascadeShadowsSetCascadeBoundsScale(5.0)
-                SetFlashLightFadeDistance(10.0)
-                SetLightsCutoffDistanceTweak(10.0)
-                DistantCopCarSirens(true)
-                SetArtificialLightsState(false)
-            else
-                DATA_SETTINGS.booster = true
-
-                RopeDrawShadowEnabled(false)
-                CascadeShadowsClearShadowSampleType()
-                CascadeShadowsSetAircraftMode(false)
-                CascadeShadowsEnableEntityTracker(true)
-                CascadeShadowsSetDynamicDepthMode(false)
-                CascadeShadowsSetEntityTrackerScale(0.0)
-                CascadeShadowsSetDynamicDepthValue(0.0)
-                CascadeShadowsSetCascadeBoundsScale(0.0)
-                SetFlashLightFadeDistance(0.0)
-                SetLightsCutoffDistanceTweak(0.0)
-                DistantCopCarSirens(false)
-            end
+            OnBooster(not DATA_SETTINGS.booster)
         end
     }
 
@@ -1031,6 +1031,9 @@ OpenCompanyMenu = function()
 
     local MENU = {}
     local DATA_SOC_MONEY = lib.callback.await('zrx_personalmenu:server:getSocietyMoney', 500, ESX.PlayerData.job.name)
+    local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
+    local nearPlayerId = GetPlayerServerId(nearPlayer)
+    local nearPlayerPed = GetPlayerPed(nearPlayer)
 
     MENU[#MENU + 1] = {
         title = Strings.back,
@@ -1050,12 +1053,10 @@ OpenCompanyMenu = function()
         description = Strings.company_hire_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
-
-            if playerClos == -1 or playerDis > 5 then
+            if not DoesEntityExist(nearPlayerPed) then
                 Config.Notification(nil, Strings.no_nearby)
             else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', GetPlayerServerId(playerClos), 'hire')
+                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'hire')
             end
         end
     }
@@ -1065,12 +1066,10 @@ OpenCompanyMenu = function()
         description = Strings.company_fire_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
-
-            if playerClos == -1 or playerDis > 5 then
+            if not DoesEntityExist(nearPlayerPed) then
                 Config.Notification(nil, Strings.no_nearby)
             else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', GetPlayerServerId(playerClos), 'fire')
+                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'fire')
             end
         end
     }
@@ -1080,12 +1079,10 @@ OpenCompanyMenu = function()
         description = Strings.company_promote_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
-
-            if playerClos == -1 or playerDis > 5 then
+            if not DoesEntityExist(nearPlayerPed) then
                 Config.Notification(nil, Strings.no_nearby)
             else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', GetPlayerServerId(playerClos), 'promote')
+                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'promote')
             end
         end
     }
@@ -1095,12 +1092,10 @@ OpenCompanyMenu = function()
         description = Strings.company_derank_desc,
         arrow = false,
         onSelect = function()
-            local playerClos, playerDis = lib.getClosestPlayer(cache.coords, 5, false)
-
-            if playerClos == -1 or playerDis > 5 then
+            if not DoesEntityExist(nearPlayerPed) then
                 Config.Notification(nil, Strings.no_nearby)
             else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', GetPlayerServerId(playerClos), 'derank')
+                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'derank')
             end
         end
     }
@@ -1162,6 +1157,71 @@ OpenNavigationMenu = function()
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:navigation')
+end
+
+OnBooster = function(state)
+    DATA_SETTINGS.booster = state
+    print(state)
+    if not state then
+        RopeDrawShadowEnabled(true)
+        CascadeShadowsSetAircraftMode(true)
+        CascadeShadowsEnableEntityTracker(false)
+        CascadeShadowsSetDynamicDepthMode(true)
+        CascadeShadowsSetEntityTrackerScale(5.0)
+        CascadeShadowsSetDynamicDepthValue(5.0)
+        CascadeShadowsSetCascadeBoundsScale(5.0)
+        SetFlashLightFadeDistance(10.0)
+        SetLightsCutoffDistanceTweak(10.0)
+        DistantCopCarSirens(true)
+        SetArtificialLightsState(false)
+    else
+        RopeDrawShadowEnabled(false)
+        CascadeShadowsClearShadowSampleType()
+        CascadeShadowsSetAircraftMode(false)
+        CascadeShadowsEnableEntityTracker(true)
+        CascadeShadowsSetDynamicDepthMode(false)
+        CascadeShadowsSetEntityTrackerScale(0.0)
+        CascadeShadowsSetDynamicDepthValue(0.0)
+        CascadeShadowsSetCascadeBoundsScale(0.0)
+        SetFlashLightFadeDistance(0.0)
+        SetLightsCutoffDistanceTweak(0.0)
+        DistantCopCarSirens(false)
+    end
+
+    local pedCoords
+    CreateThread(function()
+        while DATA_SETTINGS.booster do
+            pedCoords = GetEntityCoords(cache.ped)
+            DisableOcclusionThisFrame()
+            SetDisableDecalRenderingThisFrame()
+            RemoveParticleFxInRange(vector3(pedCoords.x, pedCoords.y, pedCoords.z), 10.0)
+            OverrideLodscaleThisFrame(0.4)
+            SetArtificialLightsState(true)
+            ClearAllBrokenGlass()
+            LeaderboardsReadClearAll()
+            ClearBrief()
+            ClearGpsFlags()
+            ClearPrints()
+            ClearSmallPrints()
+            ClearReplayStats()
+            LeaderboardsClearCacheData()
+            ClearFocus()
+            ClearHdArea()
+            ClearPedBloodDamage(cache.ped)
+            ClearPedWetness(cache.ped)
+            ClearPedEnvDirt(cache.ped)
+            ResetPedVisibleDamage(cache.ped)
+            ClearPedLastWeaponDamage(cache.ped)
+            ClearExtraTimecycleModifier()
+            ClearTimecycleModifier()
+            ClearOverrideWeather()
+            DisableVehicleDistantlights(false)
+            DisableScreenblurFade()
+            SetRainLevel(0.0)
+            SetWindSpeed(0.0)
+            Wait()
+        end
+    end)
 end
 
 PayBill = function(bill)
