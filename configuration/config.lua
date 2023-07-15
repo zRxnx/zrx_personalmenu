@@ -68,10 +68,8 @@ Config.Server = {
 Config.IdcardMenu = function(players, type)
     if type == 'idcard' then
         if players?.target then
-            print(players.target, players.author)
             TriggerServerEvent('jsfour-idcard:open', players.author, players.target)
         else
-            print(players.author)
             TriggerServerEvent('jsfour-idcard:open', players.author, players.author)
         end
     elseif type == 'driver' then
