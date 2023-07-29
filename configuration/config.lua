@@ -1,20 +1,20 @@
-local seconds, minutes = 1000, 60000
 Config = {}
 
---| Discord Webhook in 'server/server.lua'
+--| Discord Webhook in 'configuration/webhook.lua'
 Config.Command = 'personalmenu' --| Command
 Config.Key = 'F5' --| Note: Its a keymapping
-Config.Cooldown = 3 * seconds --| Note: Only for client > server or server > client | To disable set to 0
+Config.Cooldown = 3 --| Note: Only for client > server or server > client | To disable set to 0 | In seconds
 Config.CheckForUpdates = true --| Check for updates?
+Config.IconColor  = 'rgba(173, 216, 230, 1)' --| rgba format
 Config.Menu = {
-    informations = true,
+    player = true,
     idcard = true, --| Config.IdcardMenu
-    settings = true,
     vehicle = true,
+    settings = true,
     bills = true,
-    company = true,
-    navigation = true,
-    server = true
+    company = true, --| Config.Company
+    navigation = true, --| Config.Navigation
+    information = true, --| Config.Information
 }
 
 --| Company settings
@@ -25,20 +25,20 @@ Config.Company = {
     },
 
     allowedGrades = { --| grade names for company feature
-        ['boss'] = true,
-        ['co_boss'] = true,
+        boss = true,
+        co_boss = true,
     }
 }
 
 --| Navigation settings
 Config.Navigation = {
     timeout = 120, --| In seconds
-    checkFinish = 25.0, --| In GTA Units
+    checkDistance = 25, --| In GTA Units
     destinations = { --| Place here your locations
-        { label = 'Police Station', coords = vector3(407.6613, -986.1854, 29.2603-0.9) },
-        { label = 'Medical Center', coords = vector3(291.7147, -586.7615, 43.1760-0.9) },
-        { label = 'Mechanic', coords = vector3(-377.3869, -131.3874, 38.6804-0.9) },
-        { label = 'Meetingpoint', coords = vector3(217.9133, -850.6498, 30.1731-0.9) },
+        { label = 'Police Station', coords = vector3(407.6613, -986.1854, 29.2603-0.9), icon = 'fa-solid fa-building-shield' },
+        { label = 'Medical Center', coords = vector3(291.7147, -586.7615, 43.1760-0.9), icon = 'fa-solid fa-house-medical' },
+        { label = 'Mechanic', coords = vector3(-377.3869, -131.3874, 38.6804-0.9), icon = 'fa-solid fa-toolbox' },
+        { label = 'Meetingpoint', coords = vector3(217.9133, -850.6498, 30.1731-0.9), icon = 'fa-solid fa-location-dot' },
     },
     route = function(coords, text) --| Change it if you know what you are doing
         local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
@@ -59,30 +59,30 @@ Config.Navigation = {
 }
 
 --| Place here your links/informations
-Config.Server = {
+Config.Information = {
     { label = 'Discord', value = 'discord.gg/example' },
     { label = 'Website', value = 'www.example.com' },
 }
 
 --| Place here your idcard actions
-Config.IdcardMenu = function(players, type)
+Config.IdcardMenu = function(type, target)
     if type == 'idcard' then
-        if players?.target then
-            TriggerServerEvent('jsfour-idcard:open', players.author, players.target)
+        if target then
+            TriggerServerEvent('jsfour-idcard:open', cache.serverId, target)
         else
-            TriggerServerEvent('jsfour-idcard:open', players.author, players.author)
+            TriggerServerEvent('jsfour-idcard:open', cache.serverId, cache.serverId)
         end
     elseif type == 'driver' then
-        if players?.target then
-            TriggerServerEvent('jsfour-idcard:open', players.author, players.target, 'driver')
+        if target then
+            TriggerServerEvent('jsfour-idcard:open', cache.serverId, target, 'driver')
         else
-            TriggerServerEvent('jsfour-idcard:open', players.author, players.author, 'driver')
+            TriggerServerEvent('jsfour-idcard:open', cache.serverId, cache.serverId, 'driver')
         end
     elseif type == 'weapon' then
-        if players?.target then
-            TriggerServerEvent('jsfour-idcard:open', players.author, players.target, 'weapon')
+        if target then
+            TriggerServerEvent('jsfour-idcard:open', cache.serverId, target, 'weapon')
         else
-            TriggerServerEvent('jsfour-idcard:open', players.author, players.author, 'weapon')
+            TriggerServerEvent('jsfour-idcard:open', cache.serverId, cache.serverId, 'weapon')
         end
     end
 end
@@ -95,10 +95,19 @@ Config.ESXAccounts = {
     black_money = 'black_money'
 }
 
+--| Player here your labels for each license
+--| Key is the type, the value is the label
+Config.Licenses = {
+    dmv = 'Theoretical driving test'
+}
+
 --| Place here your punish actions
 Config.PunishPlayer = function(player, reason)
     if not IsDuplicityVersion() then return end
-    DiscordLog(player, 'PUNISH', reason)
+    if Webhook.Settings.punish then
+        DiscordLog(player, 'PUNISH', reason, 'punish')
+    end
+
     DropPlayer(player, reason)
 end
 
@@ -109,7 +118,7 @@ end
 
 --| Place here your checks before the vehicle menu opens
 Config.CanOpenExtras = function()
-    return GetVehicleBodyHealth(GetVehiclePedIsIn(cache.ped, false)) >= 950 or true
+    return GetVehicleBodyHealth(GetVehiclePedIsIn(cache.ped, false)) >= 950
 end
 
 --| Place here your notification
@@ -146,10 +155,10 @@ end
 
 --| Place here your esx import
 --| Change it if you know what you are doing
-Config.esxImport = function()
+Config.EsxImport = function()
 	if IsDuplicityVersion() then
-		return exports['es_extended']:getSharedObject()
+		return exports.es_extended:getSharedObject()
 	else
-		return exports['es_extended']:getSharedObject()
+		return exports.es_extended:getSharedObject()
 	end
 end

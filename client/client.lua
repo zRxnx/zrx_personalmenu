@@ -1,4 +1,4 @@
-ESX, COOLDOWN = Config.esxImport(), nil
+ESX, COOLDOWN, DATA_ROUTE = Config.EsxImport(), false, {}
 local GetEntityCoords = GetEntityCoords
 local SetBlipRoute = SetBlipRoute
 local RemoveBlip = RemoveBlip
@@ -11,15 +11,10 @@ RegisterNetEvent('esx:setJob', function(job)
 	ESX.PlayerData.job = job
 end)
 
-RegisterCommand(Config.Command, function()
-    if not Config.CanOpenMenu() then return end
-
-    OpenMainMenu()
-end)
+RegisterCommand(Config.Command, function() OpenMainMenu() end)
 RegisterKeyMapping(Config.Command, Strings.cmd_desc, 'keyboard', Config.Key)
 TriggerEvent('chat:addSuggestion', ('/%s'):format(Config.Command), Strings.cmd_desc, {})
 
-DATA_ROUTE = {}
 CreateThread(function()
     local pedCoords
     while true do
@@ -31,7 +26,7 @@ CreateThread(function()
                 DATA_ROUTE[k] = nil
 
                 Config.Notification(nil, Strings.navi_timeout)
-            elseif #(vector3(data.coords.x, data.coords.y, data.coords.z) - vector3(pedCoords.x, pedCoords.y, pedCoords.z)) < Config.Navigation.checkFinish then
+            elseif #(vector3(data.coords.x, data.coords.y, pedCoords.z) - vector3(pedCoords.x, pedCoords.y, pedCoords.z)) < Config.Navigation.checkDistance then
                 SetBlipRoute(data.blip, false)
                 RemoveBlip(data.blip)
                 DATA_ROUTE[k] = nil
@@ -46,7 +41,7 @@ CreateThread(function()
 end)
 
 exports('openMenu', OpenMainMenu)
-exports('getCooldown', function()
+exports('hasCooldown', function()
     return COOLDOWN
 end)
 exports('getConfig', function()

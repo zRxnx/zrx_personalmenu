@@ -36,16 +36,47 @@ local DisableVehicleDistantlights = DisableVehicleDistantlights
 local DisableScreenblurFade = DisableScreenblurFade
 local SetRainLevel = SetRainLevel
 local SetWindSpeed = SetWindSpeed
+local GetPlayerName = GetPlayerName
+local DoesEntityExist = DoesEntityExist
+local GetPedInVehicleSeat = GetPedInVehicleSeat
+local SetVehicleEngineOn = SetVehicleEngineOn
+local SetVehicleUndriveable = SetVehicleUndriveable
+local GetEntityCoords = GetEntityCoords
+local GetPlayerServerId = GetPlayerServerId
+local GetPlayerPed = GetPlayerPed
+local DoesExtraExist = DoesExtraExist
+local IsVehicleExtraTurnedOn = IsVehicleExtraTurnedOn
+local SetVehicleExtra = SetVehicleExtra
+local GetVehicleNumberPlateText = GetVehicleNumberPlateText
+local GetVehicleLiveryCount = GetVehicleLiveryCount
+local SetVehicleLivery = SetVehicleLivery
+local SetVehicleInteriorlight = SetVehicleInteriorlight
+local SetVehicleLights = SetVehicleLights
+local DisableVehicleNeonLights = DisableVehicleNeonLights
+local RollUpWindow = RollUpWindow
+local RollDownWindow = RollDownWindow
+local RollDownWindows = RollDownWindows
+local SetVehicleDoorShut = SetVehicleDoorShut
+local SetVehicleDoorOpen = SetVehicleDoorOpen
+local SetVehicleDoorsShut = SetVehicleDoorsShut
+local LoadResourceFile = LoadResourceFile
+local GetCurrentResourceName = GetCurrentResourceName
+local SetVisualSettingFloat = SetVisualSettingFloat
 
 OpenMainMenu = function()
-    ESX.UI.Menu.CloseAll()
+    if not Config.CanOpenMenu() then return end
     local MENU = {}
 
-    if Config.Menu.informations then
+    ESX.UI.Menu.CloseAll()
+    ESX.CloseContext()
+
+    if Config.Menu.player then
         MENU[#MENU + 1] = {
             title = Strings.info_title,
             description = Strings.info_desc,
             arrow = true,
+            icon = 'fa-solid fa-user',
+            iconColor = Config.IconColor,
             onSelect = function()
                 OpenInfoMenu()
             end
@@ -57,6 +88,8 @@ OpenMainMenu = function()
             title = Strings.idcard_title,
             description = Strings.idcard_desc,
             arrow = true,
+            icon = 'fa-solid fa-id-card',
+            iconColor = Config.IconColor,
             onSelect = function()
                 OpenIDcardMenu()
             end
@@ -68,6 +101,8 @@ OpenMainMenu = function()
             title = Strings.setting_title,
             description = Strings.setting_desc,
             arrow = true,
+            icon = 'fa-solid fa-gears',
+            iconColor = Config.IconColor,
             onSelect = function()
                 OpenSettingMenu()
             end
@@ -75,16 +110,17 @@ OpenMainMenu = function()
     end
 
     if Config.Menu.vehicle then
-        if (DoesEntityExist(cache.vehicle)) and GetPedInVehicleSeat(cache.vehicle, -1) == cache.ped then
-            MENU[#MENU + 1] = {
-                title = Strings.veh_title,
-                description = Strings.veh_desc,
-                arrow = true,
-                onSelect = function()
-                    OpenVehicleMenu()
-                end
-            }
-        end
+        MENU[#MENU + 1] = {
+            title = Strings.veh_title,
+            description = Strings.veh_desc,
+            arrow = true,
+            icon = 'fa-solid fa-car',
+            iconColor = Config.IconColor,
+            disabled = not IsVehicleValid(),
+            onSelect = function()
+                OpenVehicleMenu()
+            end
+        }
     end
 
     if Config.Menu.bills then
@@ -92,6 +128,8 @@ OpenMainMenu = function()
             title = Strings.bills_title,
             description = Strings.bills_desc,
             arrow = true,
+            icon = 'fa-solid fa-money-bill',
+            iconColor = Config.IconColor,
             onSelect = function()
                 OpenBillMenu()
             end
@@ -99,16 +137,17 @@ OpenMainMenu = function()
     end
 
     if Config.Menu.company then
-        if IsGradeAllowed() then
-            MENU[#MENU + 1] = {
-                title = Strings.company_title,
-                description = Strings.company_desc,
-                arrow = true,
-                onSelect = function()
-                    OpenCompanyMenu()
-                end
-            }
-        end
+        MENU[#MENU + 1] = {
+            title = Strings.company_title,
+            description = Strings.company_desc,
+            arrow = true,
+            icon = 'fa-solid fa-building',
+            iconColor = Config.IconColor,
+            disabled = not IsGradeAllowed(),
+            onSelect = function()
+                OpenCompanyMenu()
+            end
+        }
     end
 
     if Config.Menu.navigation then
@@ -116,18 +155,22 @@ OpenMainMenu = function()
             title = Strings.navi_title,
             description = Strings.navi_desc,
             arrow = true,
+            icon = 'fa-solid fa-compass',
+            iconColor = Config.IconColor,
             onSelect = function()
                 OpenNavigationMenu()
             end
         }
     end
 
-    if Config.Menu.server then
+    if Config.Menu.information then
         MENU[#MENU + 1] = {
-            title = Strings.server_title,
-            description = Strings.server_desc,
+            title = Strings.information_title,
+            description = Strings.information_desc,
             arrow = false,
-            metadata = Config.Server
+            icon = 'fa-solid fa-circle-info',
+            iconColor = Config.IconColor,
+            metadata = Config.Information
         }
     end
 
@@ -141,87 +184,101 @@ OpenMainMenu = function()
 end
 
 OpenInfoMenu = function()
-    if COOLDOWN then
+    local MENU = {}
+    local PLAYER_DATA = lib.callback.await('zrx_personalmenu:server:getPlayerData', 500)
+
+    if COOLDOWN or not PLAYER_DATA?.name then
         Config.Notification(nil, Strings.on_cooldown)
-        return
+        return OpenMainMenu()
     end
     StartCooldown()
 
-    local MENU = {}
-    local PLAYER_DATA = lib.callback.await('zrx_personalmenu:server:getPlayerData', 500)
-    local SID = GetPlayerServerId(cache.playerId)
-
-    MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenMainMenu()
-        end
-    }
-
     MENU[#MENU + 1] = {
         title = Strings.player_title,
-        description = (Strings.player_desc):format(SID, GetPlayerName(cache.playerId), PLAYER_DATA.ping),
+        description = (Strings.player_desc):format(cache.serverId, GetPlayerName(cache.playerId), PLAYER_DATA.ping),
         arrow = false,
+        icon = 'fa-solid fa-user',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.rpname_title,
         description = (Strings.rpname_desc):format(PLAYER_DATA.name),
         arrow = false,
+        icon = 'fa-solid fa-signature',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.dob_title,
         description = (Strings.dob_desc):format(PLAYER_DATA.dob),
         arrow = false,
+        icon = 'fa-solid fa-calendar-days',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.height_title,
         description = (Strings.height_desc):format(PLAYER_DATA.height),
         arrow = false,
+        icon = 'fa-solid fa-person',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.sex_title,
         description = (Strings.sex_desc):format(ESX.PlayerData.sex == 'm' and Strings.male or Strings.female),
         arrow = false,
+        icon = 'fa-solid fa-genderless',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.job_title,
         description = (Strings.job_desc):format(PLAYER_DATA.job.label),
         arrow = false,
+        icon = 'fa-solid fa-briefcase',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.job_grade_title,
         description = (Strings.job_grade_desc):format(PLAYER_DATA.job.grade_label, PLAYER_DATA.job.grade),
         arrow = false,
+        icon = 'fa-solid fa-briefcase',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.bank_title,
         description = (Strings.bank_desc):format(ESX.Math.GroupDigits(PLAYER_DATA.bank)),
         arrow = false,
+        icon = 'fa-solid fa-credit-card',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.money_title,
         description = (Strings.money_desc):format(ESX.Math.GroupDigits(PLAYER_DATA.money)),
         arrow = false,
+        icon = 'fa-solid fa-coins',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.black_money_title,
         description = (Strings.black_money_desc):format(ESX.Math.GroupDigits(PLAYER_DATA.black_money)),
         arrow = false,
+        icon = 'fa-solid fa-dollar-sign',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.lice_title,
         description = Strings.lice_desc,
         arrow = true,
+        icon = 'fa-solid fa-id-card',
+        iconColor = Config.IconColor,
         onSelect = function()
             OpenInfoLicenseMenu()
         end
@@ -231,6 +288,7 @@ OpenInfoMenu = function()
         id = 'zrx_personalmenu:personal_menu:info',
         title = Strings.menu_info,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:info')
@@ -240,17 +298,24 @@ OpenInfoLicenseMenu = function()
     local MENU = {}
     local PLAYER_LICENSES = lib.callback.await('zrx_personalmenu:server:getPlayerLicenses', 500)
 
-    MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenInfoMenu()
-        end
-    }
+    StartCooldown()
 
-    for k, data in pairs(PLAYER_LICENSES) do
+    if #PLAYER_LICENSES > 0 then
+        for k, data in pairs(PLAYER_LICENSES) do
+            MENU[#MENU + 1] = {
+                title = Config.Licenses[data.type] or data.type:upper(),
+                arrow = false,
+                icon = 'fa-solid fa-id-card',
+                iconColor = Config.IconColor,
+            }
+        end
+    else
         MENU[#MENU + 1] = {
-            title = data.type:upper(),
+            title = Strings.lice_no,
+            description = Strings.lice_no_desc,
             arrow = false,
+            icon = 'fa-solid fa-xmark',
+            iconColor = Config.IconColor,
         }
     end
 
@@ -258,6 +323,7 @@ OpenInfoLicenseMenu = function()
         id = 'zrx_personalmenu:personal_menu:info:licenses',
         title = Strings.menu_info_lice,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:info'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:info:licenses')
@@ -270,106 +336,103 @@ OpenIDcardMenu = function()
     local nearPlayerPed = GetPlayerPed(nearPlayer)
 
     MENU[#MENU + 1] = {
-        title = Strings.back,
+        title = Strings.idcard_view_title,
+        description = Strings.idcard_view_desc,
+        arrow = false,
+        icon = 'fa-solid fa-id-card',
+        iconColor = Config.IconColor,
         onSelect = function()
-            OpenMainMenu()
+            Config.IdcardMenu('idcard')
         end
     }
 
     MENU[#MENU + 1] = {
-        title = Strings.idcard_view_title,
-        description = Strings.idcard_view_desc,
+        title = Strings.idcard_show_title,
+        description = Strings.idcard_show_desc,
         arrow = false,
+        icon = 'fa-solid fa-id-card',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
         onSelect = function()
-            Config.IdcardMenu({ author = cache.serverId }, 'idcard')
+            Config.IdcardMenu('idcard', nearPlayerId)
         end
     }
-
-    if DoesEntityExist(nearPlayerPed) then
-        MENU[#MENU + 1] = {
-            title = Strings.idcard_show_title,
-            description = Strings.idcard_show_desc,
-            arrow = false,
-            onSelect = function()
-                Config.IdcardMenu({ author = cache.serverId, target = nearPlayerId }, 'idcard')
-            end
-        }
-    end
 
     MENU[#MENU + 1] = {
         title = Strings.driver_view_title,
         description = Strings.driver_view_desc,
         arrow = false,
+        icon = 'fa-solid fa-id-card',
+        iconColor = Config.IconColor,
         onSelect = function()
-            Config.IdcardMenu({ author = cache.serverId }, 'driver')
+            Config.IdcardMenu('driver')
         end
     }
 
-    if DoesEntityExist(nearPlayerPed) then
-        MENU[#MENU + 1] = {
-            title = Strings.driver_show_title,
-            description = Strings.driver_show_desc,
-            arrow = false,
-            onSelect = function()
-                Config.IdcardMenu({ author = cache.serverId, target = nearPlayerId }, 'driver')
-            end
-        }
-    end
+    MENU[#MENU + 1] = {
+        title = Strings.driver_show_title,
+        description = Strings.driver_show_desc,
+        arrow = false,
+        icon = 'fa-solid fa-id-card',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
+        onSelect = function()
+            Config.IdcardMenu('driver', nearPlayerId)
+        end
+    }
 
     MENU[#MENU + 1] = {
         title = Strings.weapon_view_title,
         description = Strings.weapon_view_desc,
         arrow = false,
+        icon = 'fa-solid fa-id-card',
+        iconColor = Config.IconColor,
         onSelect = function()
-            Config.IdcardMenu({ author = cache.serverId }, 'weapon')
+            Config.IdcardMenu('weapon')
         end
     }
 
-    if DoesEntityExist(nearPlayerPed) then
-        MENU[#MENU + 1] = {
-            title = Strings.weapon_show_title,
-            description = Strings.weapon_show_desc,
-            arrow = false,
-            onSelect = function()
-                Config.IdcardMenu({ author = cache.serverId, target = nearPlayerId }, 'weapon')
-            end
-        }
-    end
+    MENU[#MENU + 1] = {
+        title = Strings.weapon_show_title,
+        description = Strings.weapon_show_desc,
+        arrow = false,
+        icon = 'fa-solid fa-id-card',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
+        onSelect = function()
+            Config.IdcardMenu('weapon', nearPlayerId)
+        end
+    }
 
     lib.registerContext({
         id = 'zrx_personalmenu:personal_menu:idcard',
         title = Strings.menu_idcard,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:idcard')
 end
 
-DATA_ENGINE = true
+local DATA_ENGINE = true
 OpenVehicleMenu = function()
-    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
-        OpenMainMenu()
-        return
+    if not IsVehicleValid() then
+        return OpenMainMenu()
     end
 
     local MENU = {}
 
     MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenMainMenu()
-        end
-    }
-
-    MENU[#MENU + 1] = {
         title = Strings.eng_title,
         description = Strings.eng_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_ENGINE then
                 DATA_ENGINE = false
 
-                while not DATA_ENGINE and DoesEntityExist(cache.vehicle) and GetPedInVehicleSeat(cache.vehicle, -1) == cache.ped do
+                while not DATA_ENGINE and IsVehicleValid() do
                     SetVehicleEngineOn(cache.vehicle, false, false, false)
                     SetVehicleUndriveable(cache.vehicle, true)
                     Wait()
@@ -387,6 +450,8 @@ OpenVehicleMenu = function()
         title = Strings.extra_title,
         description = Strings.extra_desc,
         arrow = true,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             OpenVehicleExtrasMenu()
         end
@@ -396,6 +461,8 @@ OpenVehicleMenu = function()
         title = Strings.livery_title,
         description = Strings.livery_desc,
         arrow = true,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             OpenVehicleLiveryMenu()
         end
@@ -405,6 +472,8 @@ OpenVehicleMenu = function()
         title = Strings.lights_title,
         description = Strings.lights_desc,
         arrow = true,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             OpenVehicleLightsMenu()
         end
@@ -414,6 +483,8 @@ OpenVehicleMenu = function()
         title = Strings.window_title,
         description = Strings.window_desc,
         arrow = true,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             OpenVehicleWindowMenu()
         end
@@ -423,6 +494,8 @@ OpenVehicleMenu = function()
         title = Strings.doors_title,
         description = Strings.doors_desc,
         arrow = true,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             OpenVehicleDoorsMenu()
         end
@@ -432,15 +505,15 @@ OpenVehicleMenu = function()
         id = 'zrx_personalmenu:personal_menu:vehicle',
         title = Strings.menu_veh,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:vehicle')
 end
 
 OpenGiveVehicleMenu = function()
-    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
-        OpenMainMenu()
-        return
+    if not IsVehicleValid() then
+        return OpenMainMenu()
     end
 
     local MENU = {}
@@ -452,14 +525,12 @@ OpenGiveVehicleMenu = function()
         title = Strings.give_title,
         description = Strings.give_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
         onSelect = function()
-            if DoesEntityExist(nearPlayerPed) then
-                local plate = GetVehicleNumberPlateText(cache.vehicle)
-
-                TriggerServerEvent('zrx_personalmenu:server:giveCar', nearPlayerId, plate)
-            else
-                Config.Notification(nil, Strings.no_nearby)
-            end
+            local plate = GetVehicleNumberPlateText(cache.vehicle)
+            TriggerServerEvent('zrx_personalmenu:server:giveCar', nearPlayerId, plate)
         end
     }
 
@@ -467,79 +538,67 @@ OpenGiveVehicleMenu = function()
         id = 'zrx_personalmenu:personal_menu:give',
         title = Strings.menu_veh_give,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:vehicle'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:give')
 end
 
 OpenVehicleExtrasMenu = function()
-    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
-        OpenMainMenu()
-        return
+    if not IsVehicleValid() then
+        return OpenMainMenu()
     elseif not Config.CanOpenExtras() then
         Config.Notification(nil, Strings.extra_cannot)
-        OpenVehicleMenu()
-        return
+        return OpenVehicleMenu()
     end
 
     local MENU = {}
 
-    MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenVehicleMenu()
-        end
-    }
-
     for i = 0, 20 do
-        if DoesExtraExist(cache.vehicle, i) then
-            MENU[#MENU + 1] = {
-                title = (Strings.extra_title2):format(i, IsVehicleExtraTurnedOn(cache.vehicle, i) and Strings.on or Strings.off),
-                description = Strings.extra_desc2,
-                arrow = false,
-                args = { id = i },
-                onSelect = function(args)
-                    if IsVehicleExtraTurnedOn(cache.vehicle, args.id) then
-                        SetVehicleExtra(cache.vehicle, args.id, 1)
-                    else
-                        SetVehicleExtra(cache.vehicle, args.id, 0)
-                    end
-
-                    OpenVehicleExtrasMenu()
+        MENU[#MENU + 1] = {
+            title = (Strings.extra_title2):format(i, IsVehicleExtraTurnedOn(cache.vehicle, i) and Strings.on or Strings.off),
+            description = Strings.extra_desc2,
+            arrow = false,
+            icon = 'fa-solid fa-car',
+            iconColor = Config.IconColor,
+            disabled = not DoesExtraExist(cache.vehicle, i),
+            args = { id = i },
+            onSelect = function(args)
+                if IsVehicleExtraTurnedOn(cache.vehicle, args.id) then
+                    SetVehicleExtra(cache.vehicle, args.id, 1)
+                else
+                    SetVehicleExtra(cache.vehicle, args.id, 0)
                 end
-            }
-		end
+
+                OpenVehicleExtrasMenu()
+            end
+        }
     end
 
     lib.registerContext({
         id = 'zrx_personalmenu:personal_menu:vehicle:extras',
         title = Strings.menu_veh_extra,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:vehicle'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:vehicle:extras')
 end
 
 OpenVehicleLiveryMenu = function()
-    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
-        OpenMainMenu()
-        return
+    if not IsVehicleValid() then
+        return OpenMainMenu()
     end
 
     local MENU = {}
-
-    MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenVehicleMenu()
-        end
-    }
 
     for i = 0, GetVehicleLiveryCount(cache.vehicle) do
         MENU[#MENU + 1] = {
             title = (Strings.livery_title2):format(i),
             description = Strings.livery_desc2,
             arrow = false,
+            icon = 'fa-solid fa-car',
+            iconColor = Config.IconColor,
             args = { id = i },
             onSelect = function(args)
                 SetVehicleLivery(cache.vehicle, args.id)
@@ -553,35 +612,30 @@ OpenVehicleLiveryMenu = function()
         id = 'zrx_personalmenu:personal_menu:vehicle:livery',
         title = Strings.menu_veh_livery,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:vehicle'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:vehicle:livery')
 end
 
-DATA_LIGHTS = {
+local DATA_LIGHTS = {
     interior = true,
     exterior = true,
     neon = true
 }
 OpenVehicleLightsMenu = function()
-    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
-        OpenMainMenu()
-        return
+    if not IsVehicleValid() then
+        return OpenMainMenu()
     end
 
     local MENU = {}
 
     MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenVehicleMenu()
-        end
-    }
-
-    MENU[#MENU + 1] = {
         title =  Strings.lights_int_title,
         description = Strings.lights_int_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_LIGHTS.interior then
                 DATA_LIGHTS.interior = false
@@ -597,6 +651,8 @@ OpenVehicleLightsMenu = function()
         title = Strings.lights_ext_title,
         description = Strings.lights_ext_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_LIGHTS.exterior then
                 DATA_LIGHTS.exterior = false
@@ -612,6 +668,8 @@ OpenVehicleLightsMenu = function()
         title = Strings.lights_neon_title,
         description = Strings.lights_neon_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_LIGHTS.neon then
                 DATA_LIGHTS.neon = false
@@ -627,36 +685,31 @@ OpenVehicleLightsMenu = function()
         id = 'zrx_personalmenu:personal_menu:vehicle:lights',
         title = Strings.menu_veh_lights,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:vehicle'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:vehicle:lights')
 end
 
-DATA_WINDOWS = {
+local DATA_WINDOWS = {
     front_left = false,
     front_right = false,
     back_left = false,
     back_right = false
 }
 OpenVehicleWindowMenu = function()
-    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
-        OpenMainMenu()
-        return
+    if not IsVehicleValid() then
+        return OpenMainMenu()
     end
 
     local MENU = {}
 
     MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenVehicleMenu()
-        end
-    }
-
-    MENU[#MENU + 1] = {
         title = Strings.left_front_win_title,
         description = Strings.left_front_win_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.front_left then
                 DATA_LIGHTS.front_left = false
@@ -672,6 +725,8 @@ OpenVehicleWindowMenu = function()
         title = Strings.right_front_win_title,
         description = Strings.right_front_win_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.front_right then
                 DATA_LIGHTS.front_right = false
@@ -687,6 +742,8 @@ OpenVehicleWindowMenu = function()
         title = Strings.left_back_win_title,
         description = Strings.left_back_win_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.back_left then
                 DATA_LIGHTS.back_left = false
@@ -702,6 +759,8 @@ OpenVehicleWindowMenu = function()
         title = Strings.right_back_win_title,
         description = Strings.right_back_win_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.back_right then
                 DATA_LIGHTS.back_right = false
@@ -717,6 +776,8 @@ OpenVehicleWindowMenu = function()
         title = Strings.all_win_down_title,
         description = Strings.all_win_down_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             for i = 1, #DATA_WINDOWS do
                 DATA_WINDOWS[i] = false
@@ -730,6 +791,8 @@ OpenVehicleWindowMenu = function()
         title = Strings.all_win_up_title,
         description = Strings.all_win_up_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             for i = 1, #DATA_WINDOWS do
                 DATA_WINDOWS[i] = true
@@ -745,12 +808,13 @@ OpenVehicleWindowMenu = function()
         id = 'zrx_personalmenu:personal_menu:vehicle:windows',
         title = Strings.menu_veh_win,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:vehicle'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:vehicle:windows')
 end
 
-DATA_DOORS = {
+local DATA_DOORS = {
     front_left = false,
     front_right = false,
     back_left = false,
@@ -759,24 +823,18 @@ DATA_DOORS = {
     trunk = false
 }
 OpenVehicleDoorsMenu = function()
-    if not (DoesEntityExist(cache.vehicle)) or GetPedInVehicleSeat(cache.vehicle, -1) ~= cache.ped then
-        OpenMainMenu()
-        return
+    if not IsVehicleValid() then
+        return OpenMainMenu()
     end
 
     local MENU = {}
 
     MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenVehicleMenu()
-        end
-    }
-
-    MENU[#MENU + 1] = {
         title = Strings.left_front_door_title,
         description = Strings.left_front_door_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_DOORS.front_left then
                 DATA_DOORS.front_left = false
@@ -792,6 +850,8 @@ OpenVehicleDoorsMenu = function()
         title = Strings.right_front_door_title,
         description = Strings.right_front_door_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_DOORS.front_right then
                 DATA_DOORS.front_right = false
@@ -807,6 +867,8 @@ OpenVehicleDoorsMenu = function()
         title = Strings.left_back_door_title,
         description = Strings.left_back_door_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_DOORS.back_left then
                 DATA_DOORS.back_left = false
@@ -822,6 +884,8 @@ OpenVehicleDoorsMenu = function()
         title = Strings.right_back_door_title,
         description = Strings.right_back_door_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_DOORS.back_right then
                 DATA_DOORS.back_right = false
@@ -837,6 +901,8 @@ OpenVehicleDoorsMenu = function()
         title = Strings.hood_title,
         description = Strings.hood_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_DOORS.hood then
                 DATA_DOORS.hood = false
@@ -852,6 +918,8 @@ OpenVehicleDoorsMenu = function()
         title = Strings.trunk_title,
         description = Strings.trunk_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_DOORS.trunk then
                 DATA_DOORS.trunk = false
@@ -867,6 +935,8 @@ OpenVehicleDoorsMenu = function()
         title = Strings.all_doors_close_title,
         description = Strings.all_doors_close_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             for i = 1, #DATA_DOORS do
                 DATA_DOORS[i] = true
@@ -882,6 +952,8 @@ OpenVehicleDoorsMenu = function()
         title = Strings.all_doors_open_title,
         description = Strings.all_doors_open_desc,
         arrow = false,
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
         onSelect = function()
             for i = 1, #DATA_DOORS do
                 DATA_DOORS[i] = false
@@ -895,12 +967,13 @@ OpenVehicleDoorsMenu = function()
         id = 'zrx_personalmenu:personal_menu:vehicle:doors',
         title = Strings.menu_veh_doors,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:vehicle'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:vehicle:doors')
 end
 
-DATA_SETTINGS = {
+local DATA_SETTINGS = {
     graphic = false,
     booster = false
 }
@@ -909,16 +982,11 @@ OpenSettingMenu = function()
     local settingsFile, lines, setting
 
     MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenMainMenu()
-        end
-    }
-
-    MENU[#MENU + 1] = {
         title = Strings.graphic_title,
         description = Strings.graphic_desc,
         arrow = false,
+        icon = 'fa-solid fa-brush',
+        iconColor = Config.IconColor,
         onSelect = function()
             if DATA_SETTINGS.graphic then
                 DATA_SETTINGS.graphic = false
@@ -958,6 +1026,8 @@ OpenSettingMenu = function()
         title = Strings.booster_title,
         description = Strings.booster_desc,
         arrow = false,
+        icon = 'fa-solid fa-rocket',
+        iconColor = Config.IconColor,
         onSelect = function()
             OnBooster(not DATA_SETTINGS.booster)
         end
@@ -967,44 +1037,50 @@ OpenSettingMenu = function()
         id = 'zrx_personalmenu:personal_menu:setting',
         title = Strings.menu_setting,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:setting')
 end
 
 OpenBillMenu = function()
-    if COOLDOWN then
-        Config.Notification(nil, Strings.on_cooldown)
-        return
-    end
-    StartCooldown()
-
     local MENU = {}
     local PLAYER_BILLS = lib.callback.await('zrx_personalmenu:server:getPlayerBills', 500)
 
-    MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenMainMenu()
-        end
-    }
+    if COOLDOWN then
+        Config.Notification(nil, Strings.on_cooldown)
+        return OpenMainMenu()
+    end
+    StartCooldown()
 
-    for k, data in pairs(PLAYER_BILLS) do
-        MENU[#MENU + 1] = {
-            title = (Strings.bill_title):format(k --[[data.id DATABASE ID]]),
-            description = Strings.bill_desc,
-            arrow = false,
-            args = { id = data.id, label = data.label, amount = data.amount },
-            onSelect = function()
-                COOLDOWN = false
-                PayBill(data.id)
-                Wait(100)
-                OpenBillMenu()
-            end,
-            metadata = {
-                { label = Strings.bill_reason, value = data.label },
-                { label = Strings.bill_amount, value = (Strings.bill_amount_value):format(data.amount) },
+    if #PLAYER_BILLS > 0 then
+        for k, data in pairs(PLAYER_BILLS) do
+            MENU[#MENU + 1] = {
+                title = (Strings.bill_title):format(k --[[data.id DATABASE ID]]),
+                description = Strings.bill_desc,
+                arrow = false,
+                icon = 'fa-solid fa-money-bill',
+                iconColor = Config.IconColor,
+                args = { id = data.id, label = data.label, amount = data.amount },
+                onSelect = function()
+                    COOLDOWN = false
+                    PayBill(data.id)
+                    Wait(100)
+                    OpenBillMenu()
+                end,
+                metadata = {
+                    { label = Strings.bill_reason, value = data.label },
+                    { label = Strings.bill_amount, value = (Strings.bill_amount_value):format(data.amount) },
+                }
             }
+        end
+    else
+        MENU[#MENU + 1] = {
+            title = Strings.bill_no,
+            description = Strings.bill_no_desc,
+            arrow = false,
+            icon = 'fa-solid fa-xmark',
+            iconColor = Config.IconColor,
         }
     end
 
@@ -1012,52 +1088,44 @@ OpenBillMenu = function()
         id = 'zrx_personalmenu:personal_menu:bills',
         title = Strings.menu_bills,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:bills')
 end
 
 OpenCompanyMenu = function()
-    if COOLDOWN then
-        Config.Notification(nil, Strings.on_cooldown)
-        return
-    end
-    StartCooldown()
-
-    if not IsGradeAllowed() then
-        OpenMainMenu()
-        return
-    end
-
     local MENU = {}
-    local DATA_SOC_MONEY = lib.callback.await('zrx_personalmenu:server:getSocietyMoney', 500, ESX.PlayerData.job.name)
+    local DATA_SOCIETY = lib.callback.await('zrx_personalmenu:server:getSocietyData', 500, ESX.PlayerData.job.name)
     local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
     local nearPlayerId = GetPlayerServerId(nearPlayer)
     local nearPlayerPed = GetPlayerPed(nearPlayer)
 
-    MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenMainMenu()
-        end
-    }
+    if COOLDOWN then
+        Config.Notification(nil, Strings.on_cooldown)
+        return OpenMainMenu()
+    elseif not IsGradeAllowed() then
+        return OpenMainMenu()
+    end
+    StartCooldown()
 
     MENU[#MENU + 1] = {
         title = Strings.company_money_title,
-        description = (Strings.company_money_desc):format(ESX.Math.GroupDigits(DATA_SOC_MONEY)),
+        description = (Strings.company_money_desc):format(ESX.Math.GroupDigits(DATA_SOCIETY.money)),
         arrow = false,
+        icon = 'fa-solid fa-credit-card',
+        iconColor = Config.IconColor,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.company_hire_title,
         description = Strings.company_hire_desc,
         arrow = false,
+        icon = 'fa-solid fa-person',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
         onSelect = function()
-            if not DoesEntityExist(nearPlayerPed) then
-                Config.Notification(nil, Strings.no_nearby)
-            else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'hire')
-            end
+            TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'hire')
         end
     }
 
@@ -1065,12 +1133,11 @@ OpenCompanyMenu = function()
         title = Strings.company_fire_title,
         description = Strings.company_fire_desc,
         arrow = false,
+        icon = 'fa-solid fa-person',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
         onSelect = function()
-            if not DoesEntityExist(nearPlayerPed) then
-                Config.Notification(nil, Strings.no_nearby)
-            else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'fire')
-            end
+            TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'fire')
         end
     }
 
@@ -1078,12 +1145,11 @@ OpenCompanyMenu = function()
         title = Strings.company_promote_title,
         description = Strings.company_promote_desc,
         arrow = false,
+        icon = 'fa-solid fa-person',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
         onSelect = function()
-            if not DoesEntityExist(nearPlayerPed) then
-                Config.Notification(nil, Strings.no_nearby)
-            else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'promote')
-            end
+            TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'promote')
         end
     }
 
@@ -1091,12 +1157,11 @@ OpenCompanyMenu = function()
         title = Strings.company_derank_title,
         description = Strings.company_derank_desc,
         arrow = false,
+        icon = 'fa-solid fa-person',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed),
         onSelect = function()
-            if not DoesEntityExist(nearPlayerPed) then
-                Config.Notification(nil, Strings.no_nearby)
-            else
-                TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'derank')
-            end
+            TriggerServerEvent('zrx_personalmenu:server:managePlayer', nearPlayerId, 'derank')
         end
     }
 
@@ -1104,6 +1169,7 @@ OpenCompanyMenu = function()
         id = 'zrx_personalmenu:personal_menu:company',
         title = Strings.menu_company,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:company')
@@ -1112,18 +1178,13 @@ end
 OpenNavigationMenu = function()
     local MENU = {}
 
-    MENU[#MENU + 1] = {
-        title = Strings.back,
-        onSelect = function()
-            OpenMainMenu()
-        end
-    }
-
     for k, data in pairs(Config.Navigation.destinations) do
         MENU[#MENU + 1] = {
             title = data.label,
             description = Strings.navi_desc2,
             arrow = false,
+            icon = data.icon or 'fa-solid fa-location-dot',
+            iconColor = Config.IconColor,
             args = { label = data.label },
             onSelect = function(args)
                 local found = false
@@ -1138,6 +1199,7 @@ OpenNavigationMenu = function()
                     Config.Notification(nil, (Strings.navi_already):format(data.label))
                 else
                     local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(args.label))
+
                     DATA_ROUTE[#DATA_ROUTE + 1] = {
                         blip = blip,
                         coords = data.coords,
@@ -1154,6 +1216,7 @@ OpenNavigationMenu = function()
         id = 'zrx_personalmenu:personal_menu:navigation',
         title = Strings.menu_navi,
         options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:navigation')
@@ -1161,7 +1224,7 @@ end
 
 OnBooster = function(state)
     DATA_SETTINGS.booster = state
-    print(state)
+
     if not state then
         RopeDrawShadowEnabled(true)
         CascadeShadowsSetAircraftMode(true)
@@ -1230,13 +1293,20 @@ PayBill = function(bill)
 end
 
 StartCooldown = function()
+    if not Config.Cooldown then return end
     COOLDOWN = true
 
-    SetTimeout(Config.Cooldown, function()
-        COOLDOWN = false
+    CreateThread(function()
+        SetTimeout(Config.Cooldown * 1000, function()
+            COOLDOWN = false
+        end)
     end)
 end
 
 IsGradeAllowed = function()
-    return Config.Company.allowedGrades[ESX.PlayerData.job.grade_name] or false
+    return not not Config.Company.allowedGrades[ESX.PlayerData.job.grade_name]
+end
+
+IsVehicleValid = function()
+    return not not (DoesEntityExist(cache.vehicle) and GetPedInVehicleSeat(cache.vehicle, -1) == cache.ped)
 end

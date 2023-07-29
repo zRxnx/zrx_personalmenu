@@ -45,8 +45,8 @@ Strings = {
     navi_title = 'Navigation',
     navi_desc = 'Set a waypoint',
 
-    server_title = 'Server',
-    server_desc = 'See some server informations',
+    information_title = 'Server Information',
+    information_desc = 'See server informations',
 
     player_title = 'Player',
     player_desc = 'ID: #%s - Name: %s - Ping: %s', --| arg1: Server ID - arg2: Player Name - arg3: Player ping
@@ -81,13 +81,16 @@ Strings = {
     lice_title = 'Licenses',
     lice_desc = 'See your licenses',
 
+    lice_no = 'No licenses',
+    lice_no_desc = 'You dont have any licenses',
+
     idcard_view_title = 'IDCARD',
     idcard_view_desc = 'View your IDcard',
 
     idcard_show_title = 'IDCARD',
     idcard_show_desc = 'Show your IDcard',
 
-    driver_view_title = 'Driver',
+    driver_view_title = 'DRIVER',
     driver_view_desc = 'View your driver license',
 
     driver_show_title = 'DRIVER',
@@ -220,6 +223,7 @@ Strings = {
     company_lower = 'There is no lower grade!',
 
     company_not_same = 'You are not in the same company',
+    company_not_permitted = 'You are not permitted to do this',
 
     navi_desc2 = 'Press to set waypoint',
     navi_dest = 'Destination: %s', --| arg1: Destination name
@@ -234,4 +238,6 @@ Strings = {
     bill_reason = 'Reason',
     bill_amount = 'Amount',
     bill_amount_value = '$%s', --| arg1: Bill amount
+    bill_no = 'No bills',
+    bill_no_desc = 'You dont have any bills',
 }

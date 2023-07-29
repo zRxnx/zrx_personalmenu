@@ -1,37 +1,45 @@
 # zRxnx's Advanced Personal Menu System
 
-This is an advanced personal menu system for fivem
+An advanced personal menu system for FiveM
 
-<b>Features</b>
-- Informations (Character Infos, Licenses, ...)
-- Settings (FPS Booster, Graphicmod)
+## About
+
+### Features
+
+- Informations (Character/Player Infos, Licenses, ID cards)
 - Vehicles (Engine, Extra, Livery, Lights, Windows, Doors, Give)
+- Settings (FPS Booster, Graphicmod)
 - Bills (View, Pay)
-- Company (Society Infos, Hire, Fire, Promote, Derank)
-- Navigator (with Blips, multiple destination support)
-- Server Information (Links, ...)
-- Detailed config
-- Fancy discord log
+- Company (Society Infos, Hire/Fire/Promote/Derank Player)
+- Navigator (Blips, multiple destinations)
+- Server Informations
+- Highly configurable
+- Protected Events
+- Discord log with many information
 - Update checker
 - 0.0 ms on idle
 - 0.0 ms while in use
 
-<b>Exports</b>
-- openMenu
-- getCooldown
-- getConfig
+### Exports
+
+- openMenu (client)
+- hasCooldown (client & server)
+- getConfig (client & server)
 
 ## Requirements
-- es_extended
-- ox_lib
+
+- es_extended (> 1.6.0)
+- ox_lib (Latest)
 - esx_addonaccount (optional)
 - Carlock script (optional)
 
 ## Preview
-- Discord log: https://prnt.sc/fTfRhk3RmK80
-- Main menu: https://prnt.sc/KaZtNKv9D8-G
+
+![Discord Log](https://prnt.sc/O7kO317Uw8F1)
+![Main Page](https://prnt.sc/9kG677OjIkiB)
 
 ## Installation
-- Download script
+
+- Download script from Releases
 - Put script in your `resources` directory
 - Add `ensure zrx_personalmenu` in your `server.cfg`

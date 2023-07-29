@@ -5,11 +5,12 @@ use_experimental_fxv2_oal 'yes'
 
 author 'zRxnx'
 description 'Advanced personal menu system'
-version '1.3.1'
+version '2.0.0'
 
 shared_scripts {
     '@ox_lib/init.lua',
-    'configuration/*.lua',
+    'configuration/config.lua',
+    'configuration/strings.lua',
     'shared/*.lua'
 }
 
@@ -19,11 +20,12 @@ client_scripts {
 
 server_scripts {
     '@oxmysql/lib/MySQL.lua',
+    'configuration/webhook.lua',
     'server/*.lua'
 }
 
 files {
-    'files/**'
+    'files/*.dat'
 }
 
 dependencies {
