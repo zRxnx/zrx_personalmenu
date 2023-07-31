@@ -37,7 +37,7 @@ An advanced personal menu system for FiveM
 ## Preview
 
 ![Discord Log](https://i.imgur.com/S8Hvzl3.png)
-![Main Page](https://i.imgur.com/EvzoVKc.png)
+![Main Page](https://i.imgur.com/RZFYpSz.png)
 
 ## Installation
 
