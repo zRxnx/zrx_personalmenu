@@ -5,7 +5,13 @@ use_experimental_fxv2_oal 'yes'
 
 author 'zRxnx'
 description 'Advanced personal menu system'
-version '2.0.0'
+version '2.0.1'
+
+dependencies {
+    'es_extended',
+	'ox_lib',
+    'oxmysql'
+}
 
 shared_scripts {
     '@ox_lib/init.lua',
@@ -26,9 +32,4 @@ server_scripts {
 
 files {
     'files/*.dat'
-}
-
-dependencies {
-    'es_extended',
-	'ox_lib'
 }

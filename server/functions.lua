@@ -216,7 +216,7 @@ DiscordLog = function(player, title, message, webhook)
     end
 
     if not Webhook.Execlude.hwid then
-        description = ('%s `💻` **Hardware ID**: `%s`\n'):format(description, PLAYER_CACHE[player].hwids[0])
+        description = ('%s `💻` **Hardware ID**: `%s`\n'):format(description, PLAYER_CACHE[player].hwids[1])
     end
 
     if not Webhook.Execlude.steam then

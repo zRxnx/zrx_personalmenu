@@ -2,15 +2,15 @@ Webhook = {}
 
 --| Discord webhook links
 Webhook.Links = {
-    callback = '',
     punish = '',
+    callback = '',
     company = ''
 }
 
 --| Enable certain logs?
 Webhook.Settings = {
-    callback = true,
     punish = true,
+    callback = true,
     company = true
 }
 

@@ -29,13 +29,14 @@ An advanced personal menu system for FiveM
 ## Requirements
 
 - es_extended (> 1.6.0)
-- ox_lib (Latest)
+- ox_lib (latest)
+- oxmysql (latest)
 - esx_addonaccount (optional)
 - Carlock script (optional)
 
 ## Preview
 
-![Discord Log](https://i.imgur.com/RZFYpSz.png)
+![Discord Log](https://i.imgur.com/S8Hvzl3.png)
 ![Main Page](https://i.imgur.com/EvzoVKc.png)
 
 ## Installation

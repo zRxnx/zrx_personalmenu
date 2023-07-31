@@ -136,7 +136,9 @@ RegisterNetEvent('zrx_personalmenu:server:giveCar', function(target, plate)
     end
 end)
 
-exports('hasCooldown', Player.HasCooldown)
+exports('hasCooldown', function(player)
+    return not not COOLDOWN[player]
+end)
 exports('getConfig', function()
     return Config
 end)
