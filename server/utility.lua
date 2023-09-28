@@ -3,6 +3,8 @@ local curResName = GetCurrentResourceName()
 local curVersion = GetResourceMetadata(curResName, 'version')
 local resourceName = 'zrx_personalmenu'
 local continueCheck = true
+local PerformHttpRequest = PerformHttpRequest
+local Wait = Wait
 
 local getRepoInformations = function()
     local repoVersion, repoURL
@@ -19,14 +21,14 @@ local getRepoInformations = function()
         end
     end, 'GET')
 
-    repeat
-        Wait(500)
-    until (repoVersion and repoURL)
+    lib.waitFor(function()
+        return (repoVersion and repoURL)
+    end, 'Version check Timeout', 5000)
 
-    return repoVersion, repoURL
+    return repoVersion or 'INVALID RESPONSE', repoURL or 'INVALID RESPONSE'
 end
 
-local checkVersion = function(err, responseText, headers)
+local checkVersion = function()
     local repoVersion, repoURL = getRepoInformations()
 
     if curVersion ~= repoVersion then

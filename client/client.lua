@@ -2,6 +2,8 @@ ESX, COOLDOWN, DATA_ROUTE = Config.EsxImport(), false, {}
 local GetEntityCoords = GetEntityCoords
 local SetBlipRoute = SetBlipRoute
 local RemoveBlip = RemoveBlip
+local vector3 = vector3
+local Wait = Wait
 
 RegisterNetEvent('esx:playerLoaded',function(xPlayer)
     ESX.PlayerData = xPlayer
@@ -36,11 +38,14 @@ CreateThread(function()
                 DATA_ROUTE[k].time -= 1
             end
         end
+
         Wait(1000)
     end
 end)
 
-exports('openMenu', OpenMainMenu)
+exports('openMenu', function()
+    OpenMainMenu()
+end)
 exports('hasCooldown', function()
     return COOLDOWN
 end)

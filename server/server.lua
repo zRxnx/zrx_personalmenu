@@ -1,4 +1,6 @@
 ESX, PLAYER_CACHE = Config.EsxImport(), {}
+local GetPlayers = GetPlayers
+local GetPlayerPing = GetPlayerPing
 
 RegisterNetEvent('esx:playerLoaded', function(player, xPlayer, isNew)
     PLAYER_CACHE[player] = GetPlayerData(player)

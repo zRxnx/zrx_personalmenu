@@ -62,6 +62,9 @@ local SetVehicleDoorsShut = SetVehicleDoorsShut
 local LoadResourceFile = LoadResourceFile
 local GetCurrentResourceName = GetCurrentResourceName
 local SetVisualSettingFloat = SetVisualSettingFloat
+local Wait = Wait
+local TriggerServerEvent = TriggerServerEvent
+local vector3 = vector3
 
 OpenMainMenu = function()
     if not Config.CanOpenMenu() then return end

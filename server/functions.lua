@@ -1,4 +1,13 @@
 COOLDOWN = {}
+local GetPlayerName = GetPlayerName
+local GetNumPlayerTokens = GetNumPlayerTokens
+local GetPlayerGuid = GetPlayerGuid
+local GetPlayerIdentifierByType = GetPlayerIdentifierByType
+local GetPlayerToken = GetPlayerToken
+local PerformHttpRequest = PerformHttpRequest
+local GetPlayerPing = GetPlayerPing
+local GetResourceMetadata = GetResourceMetadata
+local GetCurrentResourceName = GetCurrentResourceName
 
 Player = {
     Hire = function(xPlayer, xTarget)
@@ -112,42 +121,21 @@ Player = {
 }
 
 GetPlayerData = function(player)
-    local output = GetPlayerIdentifiers(player)
     local p1, p2 = promise.new(), promise.new()
     local name = GetPlayerName(player)
     local numTokens = GetNumPlayerTokens(player)
     local guid = GetPlayerGuid(player)
-    local fivem = 'NOT FOUND'
-    local steam = 'NOT FOUND'
-    local license = 'NOT FOUND'
-    local license2 = 'NOT FOUND'
-    local discord = 'NOT FOUND'
-    local xbl = 'NOT FOUND'
-    local liveid = 'NOT FOUND'
-    local ip = 'NOT FOUND'
+    local fivem = GetPlayerIdentifierByType(player, 'fivem')
+    local steam = GetPlayerIdentifierByType(player, 'steam')
+    local license = GetPlayerIdentifierByType(player, 'license')
+    local license2 = GetPlayerIdentifierByType(player, 'license2')
+    local discord = GetPlayerIdentifierByType(player, 'discord')
+    local xbl = GetPlayerIdentifierByType(player, 'xbl')
+    local liveid = GetPlayerIdentifierByType(player, 'liveid')
+    local ip = GetPlayerIdentifierByType(player, 'ip')
     local country = 'NOT FOUND'
     local vpn = false
     local hwids = {}
-
-    for i, identifier in pairs(output) do
-        if string.sub(identifier, 1, string.len('steam:')) == 'steam:' then
-            steam = identifier:gsub('steam:', '')
-        elseif string.sub(identifier, 1, string.len('fivem:')) == 'fivem:' then
-            fivem = identifier:gsub('fivem:', '')
-        elseif string.sub(identifier, 1, string.len('license:')) == 'license:' then
-            license = identifier:gsub('license:', '')
-        elseif string.sub(identifier, 1, string.len('license2:')) == 'license2:' then
-            license2 = identifier:gsub('license2:', '')
-        elseif string.sub(identifier, 1, string.len('xbl:')) == 'xbl:' then
-            xbl = identifier:gsub('xbl:', '')
-        elseif string.sub(identifier, 1, string.len('ip:')) == 'ip:' then
-            ip = identifier:gsub('ip:', '')
-        elseif string.sub(identifier, 1, string.len('discord:')) == 'discord:' then
-            discord = identifier:gsub('discord:', '')
-        elseif string.sub(identifier, 1, string.len('live:')) == 'live:' then
-            liveid = identifier:gsub('live:', '')
-        end
-    end
 
     for i = 0, numTokens, 1 do
         hwids[#hwids + 1] = GetPlayerToken(player, i)
