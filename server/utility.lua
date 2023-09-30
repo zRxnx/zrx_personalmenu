@@ -36,6 +36,9 @@ local checkVersion = function()
         print(('^0[^3WARNING^0] Your Version: ^2%s^0'):format(curVersion))
         print(('^0[^3WARNING^0] Latest Version: ^2%s^0'):format(repoVersion))
         print(('^0[^3WARNING^0] Get the latest Version from: ^2%s^0'):format(repoURL))
+    elseif repoVersion == 'INVALID RESPONSE' or repoURL == 'INVALID RESPONSE' then
+        print('^0[^1ERROR^0] Failed to fetch version')
+        continueCheck = false
     else
         print(('^0[^2INFO^0] %s is up to date! (^2%s^0)'):format(resourceName, curVersion))
         continueCheck = false

@@ -22,7 +22,7 @@ CreateThread(function()
     while true do
         pedCoords = GetEntityCoords(cache.ped)
         for k, data in pairs(DATA_ROUTE) do
-            if data.time - 1 < 1 then
+            if data.time == 0 then
                 SetBlipRoute(data.blip, false)
                 RemoveBlip(data.blip)
                 DATA_ROUTE[k] = nil

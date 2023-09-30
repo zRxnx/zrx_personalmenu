@@ -139,7 +139,7 @@ RegisterNetEvent('zrx_personalmenu:server:giveCar', function(target, plate)
 end)
 
 exports('hasCooldown', function(player)
-    return not not COOLDOWN[player]
+    return not not COOLDOWN[PLAYER_CACHE[player].license]
 end)
 exports('getConfig', function()
     return Config
