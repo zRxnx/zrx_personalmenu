@@ -1,4 +1,4 @@
-ESX, COOLDOWN, DATA_ROUTE = Config.EsxImport(), false, {}
+ESX, COOLDOWN, DATA_ROUTE, DATA_CLOTHING = Config.EsxImport(), false, {}, {}
 local GetEntityCoords = GetEntityCoords
 local SetBlipRoute = SetBlipRoute
 local RemoveBlip = RemoveBlip
@@ -16,6 +16,67 @@ end)
 RegisterCommand(Config.Command, function() OpenMainMenu() end)
 RegisterKeyMapping(Config.Command, Strings.cmd_desc, 'keyboard', Config.Key)
 TriggerEvent('chat:addSuggestion', ('/%s'):format(Config.Command), Strings.cmd_desc, {})
+
+AddEventHandler('onResourceStop', function(res)
+    if res ~= GetCurrentResourceName() then return end
+    if not Config.Menu.clothe then return end
+
+    if DATA_CLOTHING?.arms?.state then
+        SetPedComponentVariation(cache.ped, 3, DATA_CLOTHING.arms.drawable, DATA_CLOTHING.arms.texture, 2)
+    end
+
+    if DATA_CLOTHING?.torso?.state then
+        SetPedComponentVariation(cache.ped, 11, DATA_CLOTHING.torso.drawable, DATA_CLOTHING.torso.texture, 2)
+    end
+
+    if DATA_CLOTHING?.shirt?.state then
+        SetPedComponentVariation(cache.ped, 8, DATA_CLOTHING.shirt.drawable, DATA_CLOTHING.shirt.texture, 2)
+    end
+
+    if DATA_CLOTHING?.mask?.state then
+        SetPedComponentVariation(cache.ped, 1, DATA_CLOTHING.mask.drawable, DATA_CLOTHING.mask.texture, 2)
+    end
+
+    if DATA_CLOTHING?.pants?.state then
+        SetPedComponentVariation(cache.ped, 4, DATA_CLOTHING.pants.drawable, DATA_CLOTHING.pants.texture, 2)
+    end
+
+    if DATA_CLOTHING?.bag?.state then
+        SetPedComponentVariation(cache.ped, 5, DATA_CLOTHING.bag.drawable, DATA_CLOTHING.bag.texture, 2)
+    end
+
+    if DATA_CLOTHING?.shoes?.state then
+        SetPedComponentVariation(cache.ped, 6, DATA_CLOTHING.shoes.drawable, DATA_CLOTHING.shoes.texture, 2)
+    end
+
+    if DATA_CLOTHING?.vest?.state then
+        SetPedComponentVariation(cache.ped, 9, DATA_CLOTHING.vest.drawable, DATA_CLOTHING.vest.texture, 2)
+    end
+
+    if DATA_CLOTHING?.neck?.state then
+        SetPedComponentVariation(cache.ped, 7, DATA_CLOTHING.neck.drawable, DATA_CLOTHING.neck.texture, 2)
+    end
+
+    if DATA_CLOTHING?.hat?.state then
+        SetPedPropIndex(cache.ped, 0, DATA_CLOTHING.hat.drawable, DATA_CLOTHING.hat.texture, true)
+    end
+
+    if DATA_CLOTHING?.glass?.state then
+        SetPedPropIndex(cache.ped, 1, DATA_CLOTHING.glass.drawable, DATA_CLOTHING.glass.texture, true)
+    end
+
+    if DATA_CLOTHING?.ears?.state then
+        SetPedPropIndex(cache.ped, 2, DATA_CLOTHING.ears.drawable, DATA_CLOTHING.ears.texture, true)
+    end
+
+    if DATA_CLOTHING?.watch?.state then
+        SetPedPropIndex(cache.ped, 6, DATA_CLOTHING.watch.drawable, DATA_CLOTHING.watch.texture, true)
+    end
+
+    if DATA_CLOTHING?.bracelets?.state then
+        SetPedPropIndex(cache.ped, 7, DATA_CLOTHING.bracelets.drawable, DATA_CLOTHING.bracelets.texture, true)
+    end
+end)
 
 CreateThread(function()
     local pedCoords

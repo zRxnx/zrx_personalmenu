@@ -65,6 +65,134 @@ local SetVisualSettingFloat = SetVisualSettingFloat
 local Wait = Wait
 local TriggerServerEvent = TriggerServerEvent
 local vector3 = vector3
+local TaskPlayAnim = TaskPlayAnim
+local ClearPedTasks = ClearPedTasks
+local GetPedDrawableVariation = GetPedDrawableVariation
+local GetPedTextureVariation = GetPedTextureVariation
+local SetPedComponentVariation = SetPedComponentVariation
+local SetPedPropIndex = SetPedPropIndex
+local GetPedPropIndex = GetPedPropIndex
+local GetPedPropTextureIndex = GetPedPropTextureIndex
+local ClearPedProp = ClearPedProp
+
+local CLOTHE_DATA = {
+    ComponentId = {
+        --| face = 0,
+        mask = 1,
+        --| hair = 2,
+        arms = 3,
+        pants = 4,
+        bag = 5,
+        shoes = 6,
+        neck = 7,
+        shirt = 8,
+        vest = 9,
+        --| decals = 10,
+        torso = 11,
+    },
+
+    PropId = {
+        hat = 0,
+        glass = 1,
+        ears = 2,
+        watch = 6,
+        bracelets = 7,
+    },
+
+    Set = {
+        hat = {
+            off = {
+                anim = 'take_off_helmet_stand',
+                dict = 'missheist_agency2ahelmet',
+                duration = 1000,
+            },
+
+            on = {
+                anim = 'put_on_mask',
+                dict = 'mp_masks@standard_car@ds@',
+                duration = 1000,
+            }
+        },
+
+        glass = {
+            anim = 'take_off',
+            dict = 'clothingspecs',
+            duration = 1000,
+        },
+
+        ears = {
+            anim = 'b_think',
+            dict = 'mp_cp_stolen_tut',
+            duration = 1000,
+        },
+
+        watch = {
+            anim = 'cs_nigel_dual-10',
+            dict = 'nmt_3_rcm-10',
+            duration = 1000,
+        },
+
+        bracelets = {
+            anim = 'cs_nigel_dual-10',
+            dict = 'nmt_3_rcm-10',
+            duration = 1000,
+        },
+
+        mask = {
+            anim = 'put_on_mask',
+            dict = 'mp_masks@standard_car@ds@',
+            duration = 800,
+        },
+
+        arms = {
+            anim = 'cs_nigel_dual',
+            dict = 'nmt_3_rcm-10',
+            duration = 2000,
+        },
+
+        pants = {
+            anim = 'out_of_breath',
+            dict = 're@construction',
+            duration = 1000,
+        },
+
+        bag = {
+            anim = 'intro',
+            dict = 'anim@heists@ornate_bank@grab_cash',
+            duration = 1500,
+        },
+
+        shoes = {
+            anim = 'pickup_low',
+            dict = 'random@domestic',
+            duration = 1500,
+        },
+
+        shirt = {
+            anim = 'try_tie_negative_a',
+            dict = 'clothingtie',
+            duration = 1500,
+        },
+
+        vest = {
+            anim = 'try_tie_negative_a',
+            dict = 'clothingtie',
+            duration = 1000,
+        },
+
+        torso = {
+            anim = 'michael_tux_fidget',
+            dict = 'missmic4',
+            duration = 1500,
+        },
+
+        neck = {
+            anim = 'try_tie_positive_a',
+            dict = 'clothingtie',
+            duration = 2000,
+        }
+    }
+}
 
 OpenMainMenu = function()
     if not Config.CanOpenMenu() then return end
@@ -95,6 +223,19 @@ OpenMainMenu = function()
             iconColor = Config.IconColor,
             onSelect = function()
                 OpenIDcardMenu()
+            end
+        }
+    end
+
+    if Config.Menu.clothe then
+        MENU[#MENU + 1] = {
+            title = Strings.clothe_title,
+            description = Strings.clothe_desc,
+            arrow = true,
+            icon = 'fa-solid fa-shirt',
+            iconColor = Config.IconColor,
+            onSelect = function()
+                OpenClotheMenu()
             end
         }
     end
@@ -415,6 +556,282 @@ OpenIDcardMenu = function()
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:idcard')
+end
+
+OpenClotheMenu = function()
+    local MENU = {}
+
+    MENU[#MENU + 1] = {
+        title = Strings.reset_title,
+        description = Strings.reset_desc,
+        arrow = false,
+        icon = 'fa-solid fa-power-off',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            DATA_CLOTHING.isRemoveDisabled = false
+
+            ChangeComponent('reset', 'torso')
+            ChangeComponent('reset', 'mask')
+            ChangeComponent('reset', 'arms')
+            ChangeComponent('reset', 'pants')
+            ChangeComponent('reset', 'bag')
+            ChangeComponent('reset', 'shoes')
+            ChangeComponent('reset', 'shirt')
+            ChangeComponent('reset', 'vest')
+            ChangeComponent('reset', 'neck')
+            ChangeProp('reset', 'hat')
+            ChangeProp('reset', 'glass')
+            ChangeProp('reset', 'ears')
+            ChangeProp('reset', 'watch')
+            ChangeProp('reset', 'bracelets')
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.remove_title,
+        description = Strings.remove_desc,
+        arrow = false,
+        icon = 'fa-solid fa-ban',
+        iconColor = Config.IconColor,
+        disabled = DATA_CLOTHING?.isRemoveDisabled,
+        onSelect = function()
+            DATA_CLOTHING.isRemoveDisabled = true
+
+            ChangeComponent('set', 'torso', 15, 0)
+            ChangeComponent('set', 'mask', 0, 0)
+            ChangeComponent('set', 'arms', 15, 0)
+            ChangeComponent('set', 'pants', 21, 0)
+            ChangeComponent('set', 'bag', 0, 0)
+            ChangeComponent('set', 'shoes', 34, 0)
+            ChangeComponent('set', 'shirt', 15, 0)
+            ChangeComponent('set', 'vest', 0, 0)
+            ChangeComponent('set', 'neck', 0, 0)
+            ChangeProp('remove', 'hat')
+            ChangeProp('remove', 'glass')
+            ChangeProp('remove', 'ears')
+            ChangeProp('remove', 'watch')
+            ChangeProp('remove', 'bracelets')
+        end
+    }
+
+
+    MENU[#MENU + 1] = {
+        title = Strings.hat_title,
+        description = Strings.hat_desc,
+        arrow = false,
+        icon = 'fa-brands fa-redhat',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.hat?.state then
+                ChangeProp('reset', 'hat')
+            else
+                ChangeProp('remove', 'hat')
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.mask_title,
+        description = Strings.mask_desc,
+        arrow = false,
+        icon = 'fa-solid fa-masks-theater',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.mask?.state then
+                ChangeComponent('reset', 'mask')
+            else
+                ChangeComponent('set', 'mask', 0, 0)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.ears_title,
+        description = Strings.ears_desc,
+        arrow = false,
+        icon = 'fa-solid fa-ear-listen',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.ears?.state then
+                ChangeProp('reset', 'ears')
+            else
+                ChangeProp('remove', 'ears')
+            end
+        end
+    }
+
+
+    MENU[#MENU + 1] = {
+        title = Strings.glasses_title,
+        description = Strings.glasses_desc,
+        arrow = false,
+        icon = 'fa-solid fa-glasses',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.glass?.state then
+                ChangeProp('reset', 'glass')
+            else
+                ChangeProp('remove', 'glass')
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.shirt_title,
+        description = Strings.shirt_desc,
+        arrow = false,
+        icon = 'fa-solid fa-shirt',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.shirt?.state then
+                ChangeComponent('reset', 'shirt')
+                if not DATA_CLOTHING?.torso?.state then
+                    ChangeComponent('reset', 'arms', -1, -1, true)
+                end
+            else
+                ChangeComponent('set', 'shirt', 15, 0)
+                if not DATA_CLOTHING?.torso?.state then
+                    ChangeComponent('set', 'arms', 15, 0, true)
+                end
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.torso_title,
+        description = Strings.torso_desc,
+        arrow = false,
+        icon = 'fa-solid fa-shirt',
+        iconColor = Config.IconColor,
+        disabled = GetPedDrawableVariation(cache.ped, 11) == 15 and GetPedTextureVariation(cache.ped, 11) == 0 and not DATA_CLOTHING?.torso?.state,
+        onSelect = function()
+            if DATA_CLOTHING?.torso?.state then
+                ChangeComponent('reset', 'torso')
+                if not DATA_CLOTHING?.shirt?.state then
+                    ChangeComponent('reset', 'arms', -1, -1, true)
+                end
+            else
+                ChangeComponent('set', 'torso', 15, 0)
+                if not DATA_CLOTHING?.shirt?.state then
+                    ChangeComponent('set', 'arms', 15, 0, true)
+                end
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.neck_title,
+        description = Strings.neck_desc,
+        arrow = false,
+        icon = 'fa-brands fa-black-tie',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.neck?.state then
+                ChangeComponent('reset', 'neck')
+            else
+                ChangeComponent('set', 'neck', 0, 0)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.vest_title,
+        description = Strings.vest_desc,
+        arrow = false,
+        icon = 'fa-solid fa-vest',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.vest?.state then
+                ChangeComponent('reset', 'vest')
+            else
+                ChangeComponent('set', 'vest', 0, 0)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.bag_title,
+        description = Strings.bag_desc,
+        arrow = false,
+        icon = 'fa-solid fa-bag-shopping',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.bag?.state then
+                ChangeComponent('reset', 'bag')
+            else
+                ChangeComponent('set', 'bag', 0, 0)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.pants_title,
+        description = Strings.pants_desc,
+        arrow = false,
+        icon = 'fa-solid fa-xmark',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.pants?.state then
+                ChangeComponent('reset', 'pants')
+            else
+                ChangeComponent('set', 'pants', 21, 0)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.shoes_title,
+        description = Strings.shoes_desc,
+        arrow = false,
+        icon = 'fa-solid fa-shoe-prints',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.shoes?.state then
+                ChangeComponent('reset', 'shoes')
+            else
+                ChangeComponent('set', 'shoes', 34, 0)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.watch_title,
+        description = Strings.watch_desc,
+        arrow = false,
+        icon = 'fa-solid fa-stopwatch',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.watch?.state then
+                ChangeProp('reset', 'watch')
+            else
+                ChangeProp('remove', 'watch')
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.bracelets_title,
+        description = Strings.bracelets_desc,
+        arrow = false,
+        icon = 'fa-solid fa-hand',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_CLOTHING?.bracelets?.state then
+                ChangeProp('reset', 'bracelets')
+            else
+                ChangeProp('remove', 'bracelets')
+            end
+        end
+    }
+
+    lib.registerContext({
+        id = 'zrx_personalmenu:personal_menu:clothing',
+        title = Strings.menu_clothing,
+        options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:main'
+    })
+
+    lib.showContext('zrx_personalmenu:personal_menu:clothing')
 end
 
 local DATA_ENGINE = true
@@ -1312,4 +1729,88 @@ end
 
 IsVehicleValid = function()
     return not not (DoesEntityExist(cache.vehicle) and GetPedInVehicleSeat(cache.vehicle, -1) == cache.ped)
+end
+
+PlayAnimation = function(dict, anim, duration)
+    lib.requestAnimDict(dict, 500)
+    TaskPlayAnim(cache.ped, dict, anim, 8.0, 1.0, -1, 49, 0, false, false, false)
+    Wait(duration)
+    ClearPedTasks(cache.ped)
+end
+
+ChangeComponent = function(action, type, drawable, texture, skipAnim)
+    if action == 'set' then
+        DATA_CLOTHING[type] = {
+            name = type,
+            drawable = GetPedDrawableVariation(cache.ped, CLOTHE_DATA.ComponentId[type]),
+            texture = GetPedTextureVariation(cache.ped, CLOTHE_DATA.ComponentId[type]),
+            state = true
+        }
+
+        if not skipAnim then
+            PlayAnimation(CLOTHE_DATA.Set[type].dict, CLOTHE_DATA.Set[type].anim, CLOTHE_DATA.Set[type].duration)
+        end
+
+        SetPedComponentVariation(cache.ped, CLOTHE_DATA.ComponentId[type], drawable, texture, 2)
+    elseif action == 'reset' then
+        if not DATA_CLOTHING[type]?.drawable or not DATA_CLOTHING[type]?.texture then return end
+        if DATA_CLOTHING[type]?.drawable == -1 or DATA_CLOTHING[type]?.texture == -1 then return end
+        if not skipAnim then
+            PlayAnimation(CLOTHE_DATA.Set[type].dict, CLOTHE_DATA.Set[type].anim, CLOTHE_DATA.Set[type].duration)
+        end
+
+        SetPedComponentVariation(cache.ped, CLOTHE_DATA.ComponentId[type], DATA_CLOTHING[type].drawable, DATA_CLOTHING[type].texture, 2)
+
+        DATA_CLOTHING[type] = {
+            name = type,
+            drawable = -1,
+            texture = -1,
+            state = false
+        }
+    end
+end
+
+ChangeProp = function(action, type, drawable, texture, skipAnim)
+    if action == 'set' then
+        DATA_CLOTHING[type] = {
+            name = type,
+            drawable = GetPedPropIndex(cache.ped, CLOTHE_DATA.PropId[type]),
+            texture = GetPedPropTextureIndex(cache.ped, CLOTHE_DATA.PropId[type]),
+            state = true
+        }
+
+        if not skipAnim then
+            PlayAnimation(CLOTHE_DATA.Set[type]?.on?.dict or CLOTHE_DATA.Set[type].dict, CLOTHE_DATA.Set[type]?.on?.anim or CLOTHE_DATA.Set[type].anim, CLOTHE_DATA.Set[type]?.on?.duration or CLOTHE_DATA.Set[type].duration)
+        end
+
+        SetPedPropIndex(cache.ped, CLOTHE_DATA.PropId[type], drawable, texture, true)
+    elseif action == 'remove' then
+        DATA_CLOTHING[type] = {
+            name = type,
+            drawable = GetPedPropIndex(cache.ped, CLOTHE_DATA.PropId[type]),
+            texture = GetPedPropTextureIndex(cache.ped, CLOTHE_DATA.PropId[type]),
+            state = true
+        }
+
+        if not skipAnim then
+            PlayAnimation(CLOTHE_DATA.Set[type]?.off?.dict or CLOTHE_DATA.Set[type].dict, CLOTHE_DATA.Set[type]?.off?.anim or CLOTHE_DATA.Set[type].anim, CLOTHE_DATA.Set[type]?.off?.duration or CLOTHE_DATA.Set[type].duration)
+        end
+
+        ClearPedProp(cache.ped, CLOTHE_DATA.PropId[type])
+    elseif action == 'reset' then
+        if not DATA_CLOTHING[type]?.drawable or not DATA_CLOTHING[type]?.texture then return end
+        if DATA_CLOTHING[type]?.drawable == -1 or DATA_CLOTHING[type]?.texture == -1 then return end
+        if not skipAnim then
+            PlayAnimation(CLOTHE_DATA.Set[type]?.on?.dict or CLOTHE_DATA.Set[type].dict, CLOTHE_DATA.Set[type]?.on?.anim or CLOTHE_DATA.Set[type].anim, CLOTHE_DATA.Set[type]?.on?.duration or CLOTHE_DATA.Set[type].duration)
+        end
+
+        SetPedPropIndex(cache.ped, CLOTHE_DATA.PropId[type], DATA_CLOTHING[type].drawable, DATA_CLOTHING[type].texture, true)
+
+        DATA_CLOTHING[type] = {
+            name = type,
+            drawable = -1,
+            texture = -1,
+            state = false
+        }
+    end
 end

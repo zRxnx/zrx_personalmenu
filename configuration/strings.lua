@@ -12,6 +12,7 @@ Strings = {
     menu_info = 'Personal menu - Info',
     menu_info_lice = 'Personal menu - Informations licenses',
     menu_idcard = 'Personal menu - IDCard',
+    menu_clothing = 'Personal menu - Clothing',
     menu_veh = 'Personal menu - Vehicle',
     menu_veh_give = 'Personal menu - Give Vehicle',
     menu_veh_extra = 'Personal menu - Vehicle extras',
@@ -29,6 +30,9 @@ Strings = {
 
     idcard_title = 'IDCard',
     idcard_desc = 'View/Show your IDCards',
+
+    clothe_title = 'Clothing',
+    clothe_desc = 'Manage your clothes',
 
     setting_title = 'Settings',
     setting_desc = 'Edit some settings for you',
@@ -101,6 +105,51 @@ Strings = {
 
     weapon_show_title = 'WEAPON',
     weapon_show_desc = 'Show your weapon license',
+
+    reset_title = 'Take',
+    reset_desc = 'Take your clothing',
+
+    remove_title = 'Remove',
+    remove_desc = 'Remove your clothing',
+
+    hat_title = 'Hat',
+    hat_desc = 'Take/Remove your hat',
+
+    mask_title = 'Mask',
+    mask_desc = 'Take/Remove your mask',
+
+    ears_title = 'Ears',
+    ears_desc = 'Take/Remove your ears',
+
+    glasses_title = 'Glasses',
+    glasses_desc = 'Take/Remove your glasses',
+
+    shirt_title = 'Shirt',
+    shirt_desc = 'Take/Remove your shirt',
+
+    torso_title = 'Torso',
+    torso_desc = 'Take/Remove your torso',
+
+    neck_title = 'Neck',
+    neck_desc = 'Take/Remove your neck',
+
+    vest_title = 'Vest',
+    vest_desc = 'Take/Remove your vest',
+
+    bag_title = 'Bag',
+    bag_desc = 'Take/Remove your bag',
+
+    pants_title = 'Pants',
+    pants_desc = 'Take/Remove your pants',
+
+    shoes_title = 'Shoes',
+    shoes_desc = 'Take/Remove your shoes',
+
+    watch_title = 'Watch',
+    watch_desc = 'Take/Remove your watch',
+
+    bracelets_title = 'Bracelets',
+    bracelets_desc = 'Take/Remove your bracelets',
 
     eng_title = 'Toggle Engine',
     eng_desc = 'Disable/Enable the engine',

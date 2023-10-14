@@ -8,6 +8,7 @@ Config.CheckForUpdates = true --| Check for updates?
 Config.IconColor  = 'rgba(173, 216, 230, 1)' --| rgba format
 Config.Menu = {
     player = true,
+    clothe = true,
     idcard = true, --| Config.IdcardMenu
     vehicle = true,
     settings = true,
