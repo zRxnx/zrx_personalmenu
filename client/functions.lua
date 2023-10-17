@@ -8,7 +8,6 @@ local CascadeShadowsSetDynamicDepthValue = CascadeShadowsSetDynamicDepthValue
 local CascadeShadowsSetCascadeBoundsScale = CascadeShadowsSetCascadeBoundsScale
 local SetFlashLightFadeDistance = SetFlashLightFadeDistance
 local SetLightsCutoffDistanceTweak = SetLightsCutoffDistanceTweak
-local DistantCopCarSirens = DistantCopCarSirens
 local DisableOcclusionThisFrame = DisableOcclusionThisFrame
 local SetDisableDecalRenderingThisFrame = SetDisableDecalRenderingThisFrame
 local RemoveParticleFxInRange = RemoveParticleFxInRange
@@ -74,6 +73,14 @@ local SetPedPropIndex = SetPedPropIndex
 local GetPedPropIndex = GetPedPropIndex
 local GetPedPropTextureIndex = GetPedPropTextureIndex
 local ClearPedProp = ClearPedProp
+local GetStreetNameAtCoord = GetStreetNameAtCoord
+local GetStreetNameFromHashKey = GetStreetNameFromHashKey
+local ClearGpsMultiRoute = ClearGpsMultiRoute
+local StartGpsMultiRoute = StartGpsMultiRoute
+local AddPointToGpsMultiRoute = AddPointToGpsMultiRoute
+local SetGpsMultiRouteRender = SetGpsMultiRouteRender
+local SetBlipRoute = SetBlipRoute
+local RemoveBlip = RemoveBlip
 
 local CLOTHE_DATA = {
     ComponentId = {
@@ -197,9 +204,6 @@ local CLOTHE_DATA = {
 OpenMainMenu = function()
     if not Config.CanOpenMenu() then return end
     local MENU = {}
-
-    ESX.UI.Menu.CloseAll()
-    ESX.CloseContext()
 
     if Config.Menu.player then
         MENU[#MENU + 1] = {
@@ -332,7 +336,7 @@ OpenInfoMenu = function()
     local PLAYER_DATA = lib.callback.await('zrx_personalmenu:server:getPlayerData', 500)
 
     if COOLDOWN or not PLAYER_DATA?.name then
-        Config.Notification(nil, Strings.on_cooldown)
+        CORE.Bridge.notification(Strings.on_cooldown)
         return OpenMainMenu()
     end
     StartCooldown()
@@ -343,6 +347,7 @@ OpenInfoMenu = function()
         arrow = false,
         icon = 'fa-solid fa-user',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
@@ -351,6 +356,7 @@ OpenInfoMenu = function()
         arrow = false,
         icon = 'fa-solid fa-signature',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
@@ -359,6 +365,7 @@ OpenInfoMenu = function()
         arrow = false,
         icon = 'fa-solid fa-calendar-days',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
@@ -367,14 +374,16 @@ OpenInfoMenu = function()
         arrow = false,
         icon = 'fa-solid fa-person',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
-        title = Strings.sex_title,
-        description = (Strings.sex_desc):format(ESX.PlayerData.sex == 'm' and Strings.male or Strings.female),
+        title = Strings.gender_title,
+        description = (Strings.gender_desc):format(CORE.Bridge.getVariables().sex == 'm' and Strings.male or Strings.female),
         arrow = false,
         icon = 'fa-solid fa-genderless',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
@@ -383,6 +392,7 @@ OpenInfoMenu = function()
         arrow = false,
         icon = 'fa-solid fa-briefcase',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
@@ -391,30 +401,34 @@ OpenInfoMenu = function()
         arrow = false,
         icon = 'fa-solid fa-briefcase',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.bank_title,
-        description = (Strings.bank_desc):format(ESX.Math.GroupDigits(PLAYER_DATA.bank)),
+        description = (Strings.bank_desc):format(lib.math.groupdigits(PLAYER_DATA.bank, '.')),
         arrow = false,
         icon = 'fa-solid fa-credit-card',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.money_title,
-        description = (Strings.money_desc):format(ESX.Math.GroupDigits(PLAYER_DATA.money)),
+        description = (Strings.money_desc):format(lib.math.groupdigits(PLAYER_DATA.money, '.')),
         arrow = false,
         icon = 'fa-solid fa-coins',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
         title = Strings.black_money_title,
-        description = (Strings.black_money_desc):format(ESX.Math.GroupDigits(PLAYER_DATA.black_money)),
+        description = (Strings.black_money_desc):format(lib.math.groupdigits(PLAYER_DATA.black_money, '.')),
         arrow = false,
         icon = 'fa-solid fa-dollar-sign',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
@@ -451,6 +465,7 @@ OpenInfoLicenseMenu = function()
                 arrow = false,
                 icon = 'fa-solid fa-id-card',
                 iconColor = Config.IconColor,
+                readOnly = true,
             }
         end
     else
@@ -460,6 +475,7 @@ OpenInfoLicenseMenu = function()
             arrow = false,
             icon = 'fa-solid fa-xmark',
             iconColor = Config.IconColor,
+            readOnly = true,
         }
     end
 
@@ -841,6 +857,9 @@ OpenVehicleMenu = function()
     end
 
     local MENU = {}
+    local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
+    local nearPlayerId = GetPlayerServerId(nearPlayer)
+    local nearPlayerPed = GetPlayerPed(nearPlayer)
 
     MENU[#MENU + 1] = {
         title = Strings.eng_title,
@@ -863,6 +882,20 @@ OpenVehicleMenu = function()
                 SetVehicleEngineOn(cache.vehicle, true, false, false)
                 SetVehicleUndriveable(cache.vehicle, false)
             end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.give_title,
+        description = Strings.give_desc,
+        arrow = DoesEntityExist(nearPlayerPed) and IsVehicleValid(),
+        icon = 'fa-solid fa-car',
+        iconColor = Config.IconColor,
+        disabled = not DoesEntityExist(nearPlayerPed) or not IsVehicleValid(),
+        onSelect = function()
+            local plate = GetVehicleNumberPlateText(cache.vehicle)
+
+            TriggerServerEvent('zrx_personalmenu:server:giveCar', nearPlayerId, plate)
         end
     }
 
@@ -931,44 +964,11 @@ OpenVehicleMenu = function()
     lib.showContext('zrx_personalmenu:personal_menu:vehicle')
 end
 
-OpenGiveVehicleMenu = function()
-    if not IsVehicleValid() then
-        return OpenMainMenu()
-    end
-
-    local MENU = {}
-    local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
-    local nearPlayerId = GetPlayerServerId(nearPlayer)
-    local nearPlayerPed = GetPlayerPed(nearPlayer)
-
-    MENU[#MENU + 1] = {
-        title = Strings.give_title,
-        description = Strings.give_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        disabled = not DoesEntityExist(nearPlayerPed),
-        onSelect = function()
-            local plate = GetVehicleNumberPlateText(cache.vehicle)
-            TriggerServerEvent('zrx_personalmenu:server:giveCar', nearPlayerId, plate)
-        end
-    }
-
-    lib.registerContext({
-        id = 'zrx_personalmenu:personal_menu:give',
-        title = Strings.menu_veh_give,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:vehicle'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:give')
-end
-
 OpenVehicleExtrasMenu = function()
     if not IsVehicleValid() then
         return OpenMainMenu()
     elseif not Config.CanOpenExtras() then
-        Config.Notification(nil, Strings.extra_cannot)
+        CORE.Bridge.notification(Strings.extra_cannot)
         return OpenVehicleMenu()
     end
 
@@ -979,7 +979,7 @@ OpenVehicleExtrasMenu = function()
             title = (Strings.extra_title2):format(i, IsVehicleExtraTurnedOn(cache.vehicle, i) and Strings.on or Strings.off),
             description = Strings.extra_desc2,
             arrow = false,
-            icon = 'fa-solid fa-car',
+            icon = 'fa-solid fa-car-side',
             iconColor = Config.IconColor,
             disabled = not DoesExtraExist(cache.vehicle, i),
             args = { id = i },
@@ -1011,22 +1011,34 @@ OpenVehicleLiveryMenu = function()
     end
 
     local MENU = {}
+    local livCount = GetVehicleLiveryCount(cache.vehicle)
 
-    for i = 0, GetVehicleLiveryCount(cache.vehicle) do
+    if livCount > 0 then
+        for i = 0, livCount do
+            MENU[#MENU + 1] = {
+                title = (Strings.livery_title2):format(i),
+                description = Strings.livery_desc2,
+                arrow = false,
+                icon = 'fa-solid fa-car-side',
+                iconColor = Config.IconColor,
+                args = { id = i },
+                onSelect = function(args)
+                    SetVehicleLivery(cache.vehicle, args.id)
+
+                    OpenVehicleLiveryMenu()
+                end
+            }
+        end
+    else
         MENU[#MENU + 1] = {
-            title = (Strings.livery_title2):format(i),
-            description = Strings.livery_desc2,
+            title = 'No liverys',
+            description = 'This vehicle has no liverys',
             arrow = false,
-            icon = 'fa-solid fa-car',
+            icon = 'fa-solid fa-xmark',
             iconColor = Config.IconColor,
-            args = { id = i },
-            onSelect = function(args)
-                SetVehicleLivery(cache.vehicle, args.id)
-
-                OpenVehicleLiveryMenu()
-            end
+            readOnly = true,
         }
-	end
+    end
 
     lib.registerContext({
         id = 'zrx_personalmenu:personal_menu:vehicle:livery',
@@ -1125,10 +1137,42 @@ OpenVehicleWindowMenu = function()
     local MENU = {}
 
     MENU[#MENU + 1] = {
+        title = Strings.all_win_down_title,
+        description = Strings.all_win_down_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            for i = 1, #DATA_WINDOWS do
+                DATA_WINDOWS[i] = false
+            end
+
+            RollDownWindows(cache.vehicle)
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.all_win_up_title,
+        description = Strings.all_win_up_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            for i = 1, #DATA_WINDOWS do
+                DATA_WINDOWS[i] = true
+            end
+
+            for i = 0, 3 do
+                RollUpWindow(cache.vehicle, i)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
         title = Strings.left_front_win_title,
         description = Strings.left_front_win_desc,
         arrow = false,
-        icon = 'fa-solid fa-car',
+        icon = 'fa-solid fa-car-side',
         iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.front_left then
@@ -1145,7 +1189,7 @@ OpenVehicleWindowMenu = function()
         title = Strings.right_front_win_title,
         description = Strings.right_front_win_desc,
         arrow = false,
-        icon = 'fa-solid fa-car',
+        icon = 'fa-solid fa-car-side',
         iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.front_right then
@@ -1162,7 +1206,7 @@ OpenVehicleWindowMenu = function()
         title = Strings.left_back_win_title,
         description = Strings.left_back_win_desc,
         arrow = false,
-        icon = 'fa-solid fa-car',
+        icon = 'fa-solid fa-car-side',
         iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.back_left then
@@ -1179,7 +1223,7 @@ OpenVehicleWindowMenu = function()
         title = Strings.right_back_win_title,
         description = Strings.right_back_win_desc,
         arrow = false,
-        icon = 'fa-solid fa-car',
+        icon = 'fa-solid fa-car-side',
         iconColor = Config.IconColor,
         onSelect = function()
             if DATA_WINDOWS.back_right then
@@ -1188,38 +1232,6 @@ OpenVehicleWindowMenu = function()
             else
                 DATA_LIGHTS.back_right = true
                 RollDownWindow(cache.vehicle, 3)
-            end
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.all_win_down_title,
-        description = Strings.all_win_down_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            for i = 1, #DATA_WINDOWS do
-                DATA_WINDOWS[i] = false
-            end
-
-            RollDownWindows(cache.vehicle)
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.all_win_up_title,
-        description = Strings.all_win_up_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            for i = 1, #DATA_WINDOWS do
-                DATA_WINDOWS[i] = true
-            end
-
-            for i = 0, 3 do
-                RollUpWindow(cache.vehicle, i)
             end
         end
     }
@@ -1250,112 +1262,10 @@ OpenVehicleDoorsMenu = function()
     local MENU = {}
 
     MENU[#MENU + 1] = {
-        title = Strings.left_front_door_title,
-        description = Strings.left_front_door_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            if DATA_DOORS.front_left then
-                DATA_DOORS.front_left = false
-                SetVehicleDoorShut(cache.vehicle, 0, false)
-            else
-                DATA_DOORS.front_left = true
-                SetVehicleDoorOpen(cache.vehicle, 0, false)
-            end
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.right_front_door_title,
-        description = Strings.right_front_door_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            if DATA_DOORS.front_right then
-                DATA_DOORS.front_right = false
-                SetVehicleDoorShut(cache.vehicle, 1, false)
-            else
-                DATA_DOORS.front_right = true
-                SetVehicleDoorOpen(cache.vehicle, 1, false)
-            end
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.left_back_door_title,
-        description = Strings.left_back_door_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            if DATA_DOORS.back_left then
-                DATA_DOORS.back_left = false
-                SetVehicleDoorShut(cache.vehicle, 2, false)
-            else
-                DATA_DOORS.back_left = true
-                SetVehicleDoorOpen(cache.vehicle, 2, false)
-            end
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.right_back_door_title,
-        description = Strings.right_back_door_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            if DATA_DOORS.back_right then
-                DATA_DOORS.back_right = false
-                SetVehicleDoorShut(cache.vehicle, 3, false)
-            else
-                DATA_DOORS.back_right = true
-                SetVehicleDoorOpen(cache.vehicle, 3, false)
-            end
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.hood_title,
-        description = Strings.hood_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            if DATA_DOORS.hood then
-                DATA_DOORS.hood = false
-                SetVehicleDoorShut(cache.vehicle, 4, false)
-            else
-                DATA_DOORS.hood = true
-                SetVehicleDoorOpen(cache.vehicle, 4, false)
-            end
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.trunk_title,
-        description = Strings.trunk_desc,
-        arrow = false,
-        icon = 'fa-solid fa-car',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            if DATA_DOORS.trunk then
-                DATA_DOORS.trunk = false
-                SetVehicleDoorShut(cache.vehicle, 5, false)
-            else
-                DATA_DOORS.trunk = true
-                SetVehicleDoorOpen(cache.vehicle, 5, false)
-            end
-        end
-    }
-
-    MENU[#MENU + 1] = {
         title = Strings.all_doors_close_title,
         description = Strings.all_doors_close_desc,
         arrow = false,
-        icon = 'fa-solid fa-car',
+        icon = 'fa-solid fa-car-side',
         iconColor = Config.IconColor,
         onSelect = function()
             for i = 1, #DATA_DOORS do
@@ -1372,7 +1282,7 @@ OpenVehicleDoorsMenu = function()
         title = Strings.all_doors_open_title,
         description = Strings.all_doors_open_desc,
         arrow = false,
-        icon = 'fa-solid fa-car',
+        icon = 'fa-solid fa-car-side',
         iconColor = Config.IconColor,
         onSelect = function()
             for i = 1, #DATA_DOORS do
@@ -1380,6 +1290,108 @@ OpenVehicleDoorsMenu = function()
             end
 
             SetVehicleDoorsShut(cache.vehicle)
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.left_front_door_title,
+        description = Strings.left_front_door_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_DOORS.front_left then
+                DATA_DOORS.front_left = false
+                SetVehicleDoorShut(cache.vehicle, 0, false)
+            else
+                DATA_DOORS.front_left = true
+                SetVehicleDoorOpen(cache.vehicle, 0, false)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.right_front_door_title,
+        description = Strings.right_front_door_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_DOORS.front_right then
+                DATA_DOORS.front_right = false
+                SetVehicleDoorShut(cache.vehicle, 1, false)
+            else
+                DATA_DOORS.front_right = true
+                SetVehicleDoorOpen(cache.vehicle, 1, false)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.left_back_door_title,
+        description = Strings.left_back_door_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_DOORS.back_left then
+                DATA_DOORS.back_left = false
+                SetVehicleDoorShut(cache.vehicle, 2, false)
+            else
+                DATA_DOORS.back_left = true
+                SetVehicleDoorOpen(cache.vehicle, 2, false)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.right_back_door_title,
+        description = Strings.right_back_door_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_DOORS.back_right then
+                DATA_DOORS.back_right = false
+                SetVehicleDoorShut(cache.vehicle, 3, false)
+            else
+                DATA_DOORS.back_right = true
+                SetVehicleDoorOpen(cache.vehicle, 3, false)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.hood_title,
+        description = Strings.hood_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_DOORS.hood then
+                DATA_DOORS.hood = false
+                SetVehicleDoorShut(cache.vehicle, 4, false)
+            else
+                DATA_DOORS.hood = true
+                SetVehicleDoorOpen(cache.vehicle, 4, false)
+            end
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.trunk_title,
+        description = Strings.trunk_desc,
+        arrow = false,
+        icon = 'fa-solid fa-car-side',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            if DATA_DOORS.trunk then
+                DATA_DOORS.trunk = false
+                SetVehicleDoorShut(cache.vehicle, 5, false)
+            else
+                DATA_DOORS.trunk = true
+                SetVehicleDoorOpen(cache.vehicle, 5, false)
+            end
         end
     }
 
@@ -1411,12 +1423,12 @@ OpenSettingMenu = function()
             if DATA_SETTINGS.graphic then
                 DATA_SETTINGS.graphic = false
                 settingsFile = LoadResourceFile(GetCurrentResourceName(), 'files/graphic_off.dat')
-                lines = StringSplit(settingsFile, '\n')
+                lines = CORE.Shared.StringSplit(settingsFile, '\n')
 
                 for k, v in ipairs(lines) do
-                    if not StartsWith(v, '#') and not StartsWith(v, '//') and (v ~= '' or v ~= ' ') and #v > 1 then
+                    if not CORE.Shared.StartsWith(v, '#') and not CORE.Shared.StartsWith(v, '//') and (v ~= '' or v ~= ' ') and #v > 1 then
                         v = v:gsub('%s+', ' ')
-                        setting = StringSplit(v, ' ')
+                        setting = CORE.Shared.StringSplit(v, ' ')
 
                         if setting[1] and setting[2] and tonumber(setting[2]) then
                             SetVisualSettingFloat(setting[1], tonumber(setting[2])+.0 )
@@ -1426,12 +1438,12 @@ OpenSettingMenu = function()
             else
                 DATA_SETTINGS.graphic = true
                 settingsFile = LoadResourceFile(GetCurrentResourceName(), 'files/graphic_on.dat')
-                lines = StringSplit(settingsFile, '\n')
+                lines = CORE.Shared.StringSplit(settingsFile, '\n')
 
                 for k, v in ipairs(lines) do
-                    if not StartsWith(v, '#') and not StartsWith(v, '//') and (v ~= '' or v ~= ' ') and #v > 1 then
+                    if not CORE.Shared.StartsWith(v, '#') and not CORE.Shared.StartsWith(v, '//') and (v ~= '' or v ~= ' ') and #v > 1 then
                         v = v:gsub('%s+', ' ')
-                        setting = StringSplit(v, ' ')
+                        setting = CORE.Shared.StringSplit(v, ' ')
 
                         if setting[1] and setting[2] and tonumber(setting[2]) then
                             SetVisualSettingFloat(setting[1], tonumber(setting[2])+.0 )
@@ -1466,14 +1478,38 @@ end
 OpenBillMenu = function()
     local MENU = {}
     local PLAYER_BILLS = lib.callback.await('zrx_personalmenu:server:getPlayerBills', 500)
+    local money = 0
 
     if COOLDOWN then
-        Config.Notification(nil, Strings.on_cooldown)
+        CORE.Bridge.notification(Strings.on_cooldown)
         return OpenMainMenu()
     end
     StartCooldown()
 
+    for k, data in pairs(PLAYER_BILLS) do
+        money += data.amount
+    end
+
     if #PLAYER_BILLS > 0 then
+        MENU[#MENU + 1] = {
+            title = 'Informations',
+            description = 'Hover to see',
+            arrow = false,
+            icon = 'fa-solid fa-circle-info',
+            iconColor = Config.IconColor,
+            readOnly = true,
+            metadata = {
+                {
+                    label = 'Total Bills',
+                    value = ('#%s'):format(#PLAYER_BILLS)
+                },
+                {
+                    label = 'Total Amount',
+                    value = ('$%s'):format(money)
+                },
+            }
+        }
+
         for k, data in pairs(PLAYER_BILLS) do
             MENU[#MENU + 1] = {
                 title = (Strings.bill_title):format(k --[[data.id DATABASE ID]]),
@@ -1481,16 +1517,26 @@ OpenBillMenu = function()
                 arrow = false,
                 icon = 'fa-solid fa-money-bill',
                 iconColor = Config.IconColor,
-                args = { id = data.id, label = data.label, amount = data.amount },
+                args = {
+                    id = data.id,
+                    label = data.label,
+                    amount = data.amount
+                },
                 onSelect = function()
                     COOLDOWN = false
-                    PayBill(data.id)
+                    Config.PayBill(data.id)
                     Wait(100)
                     OpenBillMenu()
                 end,
                 metadata = {
-                    { label = Strings.bill_reason, value = data.label },
-                    { label = Strings.bill_amount, value = (Strings.bill_amount_value):format(data.amount) },
+                    {
+                        label = Strings.bill_reason,
+                        value = data.label
+                    },
+                    {
+                        label = Strings.bill_amount,
+                        value = (Strings.bill_amount_value):format(data.amount)
+                    },
                 }
             }
         end
@@ -1501,6 +1547,7 @@ OpenBillMenu = function()
             arrow = false,
             icon = 'fa-solid fa-xmark',
             iconColor = Config.IconColor,
+            readOnly = true,
         }
     end
 
@@ -1516,13 +1563,13 @@ end
 
 OpenCompanyMenu = function()
     local MENU = {}
-    local DATA_SOCIETY = lib.callback.await('zrx_personalmenu:server:getSocietyData', 500, ESX.PlayerData.job.name)
+    local DATA_SOCIETY = lib.callback.await('zrx_personalmenu:server:getSocietyData', 500, CORE.Bridge.getVariables().job.name)
     local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
     local nearPlayerId = GetPlayerServerId(nearPlayer)
     local nearPlayerPed = GetPlayerPed(nearPlayer)
 
     if COOLDOWN then
-        Config.Notification(nil, Strings.on_cooldown)
+        CORE.Bridge.notification(Strings.on_cooldown)
         return OpenMainMenu()
     elseif not IsGradeAllowed() then
         return OpenMainMenu()
@@ -1531,10 +1578,11 @@ OpenCompanyMenu = function()
 
     MENU[#MENU + 1] = {
         title = Strings.company_money_title,
-        description = (Strings.company_money_desc):format(ESX.Math.GroupDigits(DATA_SOCIETY.money)),
+        description = (Strings.company_money_desc):format(lib.math.groupdigits(DATA_SOCIETY.money, '.')),
         arrow = false,
         icon = 'fa-solid fa-credit-card',
         iconColor = Config.IconColor,
+        readOnly = true,
     }
 
     MENU[#MENU + 1] = {
@@ -1598,39 +1646,46 @@ end
 OpenNavigationMenu = function()
     local MENU = {}
 
-    for k, data in pairs(Config.Navigation.destinations) do
-        MENU[#MENU + 1] = {
-            title = data.label,
-            description = Strings.navi_desc2,
-            arrow = false,
-            icon = data.icon or 'fa-solid fa-location-dot',
-            iconColor = Config.IconColor,
-            args = { label = data.label },
-            onSelect = function(args)
-                local found = false
+    MENU[#MENU + 1] = {
+        title = Strings.navi_clear,
+        description = Strings.navi_clear_desc,
+        arrow = false,
+        icon = 'fa-solid fa-xmark',
+        iconColor = Config.IconColor,
+        disabled = #DATA_BLIP < 1,
+        onSelect = function()
+            for k, data in pairs(DATA_BLIP) do
+                RemoveDestionation(k)
+            end
 
-                for v, data2 in pairs(DATA_ROUTE) do
-                    if data.coords == data2.coords then
-                        found = true
-                    end
-                end
+            CORE.Bridge.notification(Strings.navi_clear_notify)
+        end,
+    }
 
-                if found then
-                    Config.Notification(nil, (Strings.navi_already):format(data.label))
-                else
-                    local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(args.label))
+    MENU[#MENU + 1] = {
+        title = Strings.navi_preset,
+        description = Strings.navi_preset_desc,
+        arrow = true,
+        icon = 'fa-solid fa-person',
+        iconColor = Config.IconColor,
+        disabled = #Config.Navigation.destinations < 1,
+        onSelect = function()
+            OpenNavigationPresetMenu()
+        end
+    }
 
-                    DATA_ROUTE[#DATA_ROUTE + 1] = {
-                        blip = blip,
-                        coords = data.coords,
-                        time = Config.Navigation.timeout
-                    }
+    MENU[#MENU + 1] = {
+        title = Strings.navi_my,
+        description = Strings.navi_my_desc,
+        arrow = true,
+        icon = 'fa-solid fa-person',
+        iconColor = Config.IconColor,
+        disabled = #Config.Navigation.destinations < 1,
+        onSelect = function()
+            OpenNavigationMyMenu()
+        end
+    }
 
-                    Config.Notification(nil, (Strings.navi_set):format(data.label))
-                end
-            end,
-        }
-    end
 
     lib.registerContext({
         id = 'zrx_personalmenu:personal_menu:navigation',
@@ -1640,6 +1695,325 @@ OpenNavigationMenu = function()
     })
 
     lib.showContext('zrx_personalmenu:personal_menu:navigation')
+end
+
+OpenNavigationMyMenu = function()
+    local MENU = {}
+    local PLAYER_NAVI = lib.callback.await('zrx_personalmenu:server:getPlayerNavigation', 500)
+    local pedCoords = GetEntityCoords(cache.ped)
+    local street = GetStreetNameFromHashKey(GetStreetNameAtCoord(pedCoords.x, pedCoords.y, pedCoords.z))
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_create,
+        description = Strings.navi_create_desc,
+        arrow = true,
+        icon = 'fa-solid fa-plus',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            local input = lib.inputDialog(Strings.navi_create_title, {
+                {
+                    type = 'input',
+                    label = Strings.navi_create_name,
+                    description = Strings.navi_create_name_desc,
+                    required = true,
+                    min = 1,
+                    max = 64
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_create_coords,
+                    description = Strings.navi_create_coords_desc,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_create_coords_default):format(CORE.Shared.RoundNumber(pedCoords.x, 1), CORE.Shared.RoundNumber(pedCoords.y, 1), CORE.Shared.RoundNumber(pedCoords.z, 1))
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_create_street,
+                    description = Strings.navi_create_street,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_create_street_default):format(street)
+                },
+            })
+
+            if not input then
+                CORE.Bridge.notification(Strings.not_fill)
+                return OpenNavigationMyMenu()
+            end
+
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'create', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street)
+        end
+    }
+
+    if #PLAYER_NAVI > 0 then
+        for k, data in pairs(PLAYER_NAVI) do
+            MENU[#MENU + 1] = {
+                title = data.name,
+                description = Strings.navi_manage,
+                arrow = true,
+                icon = 'fa-solid fa-location-dot',
+                iconColor = Config.IconColor,
+                metadata = {
+                    {
+                        label = Strings.navi_street,
+                        value = (Strings.navi_street_desc):format(data.street)
+                    }
+                },
+                args = {
+                    name = data.name,
+                    coords = data.coords,
+                    street = data.street
+                },
+                onSelect = function(args)
+                    OpenNavigationSettingMenu(args)
+                end,
+            }
+        end
+    else
+        MENU[#MENU + 1] = {
+            title = Strings.navi_no,
+            description = Strings.navi_no_desc,
+            arrow = false,
+            icon = 'fa-solid fa-xmark',
+            iconColor = Config.IconColor,
+            readOnly = true,
+        }
+    end
+
+    lib.registerContext({
+        id = 'zrx_personalmenu:personal_menu:navigation:my',
+        title = Strings.menu_navi_my,
+        options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:navigation'
+    })
+
+    lib.showContext('zrx_personalmenu:personal_menu:navigation:my')
+end
+
+OpenNavigationSettingMenu = function(data)
+    local MENU = {}
+    local pedCoords = GetEntityCoords(cache.ped)
+    local street = GetStreetNameFromHashKey(GetStreetNameAtCoord(pedCoords.x, pedCoords.y, pedCoords.z))
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_setting,
+        description = Strings.navi_setting_desc,
+        arrow = false,
+        icon = 'fa-solid fa-circle-info',
+        iconColor = Config.IconColor,
+        readOnly = true,
+        metadata = {
+            {
+                label = Strings.navi_setting_name,
+                value = (Strings.navi_setting_name_desc):format(data.name)
+            },
+            {
+                label = Strings.navi_setting_coords,
+                value = (Strings.navi_setting_coords_desc):format(CORE.Shared.RoundNumber(data.coords.x, 1), CORE.Shared.RoundNumber(data.coords.y, 1), CORE.Shared.RoundNumber(data.coords.z, 1))
+            },
+            {
+                label = Strings.navi_setting_street,
+                value = (Strings.navi_setting_street_desc):format(data.street)
+            }
+        },
+        onSelect = function()
+            OpenNavigationMyMenu()
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_set,
+        description = Strings.navi_set_desc,
+        arrow = true,
+        icon = 'fa-solid fa-location-dot',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(data.name))
+
+            DATA_BLIP[#DATA_BLIP + 1] = {
+                blip = blip,
+                coords = data.coords,
+                time = Config.Navigation.timeout
+            }
+
+            RenderRoute(data.coords)
+            CORE.Bridge.notification((Strings.navi_set2):format(data.name))
+        end,
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_edit,
+        description = Strings.navi_edit_desc,
+        arrow = true,
+        icon = 'fa-solid fa-pen-to-square',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            local input = lib.inputDialog(Strings.navi_edit_title, {
+                {
+                    type = 'input',
+                    label = Strings.navi_edit_name,
+                    description = Strings.navi_edit_name_desc,
+                    required = true,
+                    min = 1,
+                    max = 64
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_edit_coords,
+                    description = Strings.navi_edit_coords_desc,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_edit_coords_default):format(CORE.Shared.RoundNumber(pedCoords.x, 1), CORE.Shared.RoundNumber(pedCoords.y, 1), CORE.Shared.RoundNumber(pedCoords.z, 1))
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_edit_street,
+                    description = Strings.navi_edit_street_desc,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_edit_street_default):format(street)
+                },
+            })
+
+            if not input then
+                CORE.Bridge.notification(Strings.not_fill)
+                return OpenNavigationMyMenu()
+            end
+
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'edit', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street, {
+                name = data.name,
+                coords = data.coords,
+                street = data.street,
+            })
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_delete,
+        description = Strings.navi_delete_desc,
+        arrow = true,
+        icon = 'fa-solid fa-xmark',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'delete', data.name, data.coords, data.street)
+        end
+    }
+
+    lib.registerContext({
+        id = 'zrx_personalmenu:personal_menu:navigation:setting',
+        title = Strings.menu_navi_setting,
+        options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:navigation:my'
+    })
+
+    lib.showContext('zrx_personalmenu:personal_menu:navigation:setting')
+end
+
+OpenNavigationPresetMenu = function()
+    local MENU = {}
+
+    for k, data in pairs(Config.Navigation.destinations) do
+        local disable = false
+
+        for v, data2 in pairs(DATA_BLIP) do
+            if data.coords == data2.coords then
+                disable = true
+            end
+        end
+
+        MENU[#MENU + 1] = {
+            title = data.name,
+            description = Strings.navi_desc2,
+            arrow = false,
+            icon = data.icon or 'fa-solid fa-location-dot',
+            iconColor = Config.IconColor,
+            disabled = disable,
+            metadata = {
+                {
+                    label = Strings.navi_street,
+                    value = (Strings.navi_street_desc):format(GetStreetNameFromHashKey(GetStreetNameAtCoord(data.coords.x, data.coords.y, data.coords.z)))
+                }
+            },
+            args = {
+                name = data.name
+            },
+            onSelect = function(args)
+                local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(args.name))
+
+                DATA_BLIP[#DATA_BLIP + 1] = {
+                    blip = blip,
+                    coords = data.coords,
+                    time = Config.Navigation.timeout
+                }
+
+                RenderRoute(data.coords)
+                CORE.Bridge.notification((Strings.navi_set2):format(data.name))
+            end,
+        }
+    end
+
+    lib.registerContext({
+        id = 'zrx_personalmenu:personal_menu:navigation:preset',
+        title = Strings.menu_navi_preset,
+        options = MENU,
+        menu = 'zrx_personalmenu:personal_menu:navigation'
+    })
+
+    lib.showContext('zrx_personalmenu:personal_menu:navigation:preset')
+end
+
+RenderRoute = function(coords)
+    if #DATA_ROUTE.coords < 1 then
+        local pedCoords = GetEntityCoords(cache.ped)
+
+        DATA_ROUTE.coords[#DATA_ROUTE.coords + 1] = vector3(pedCoords.x, pedCoords.y, pedCoords.z)
+    end
+
+    if coords then
+        DATA_ROUTE.coords[#DATA_ROUTE.coords + 1] = vector3(coords.x, coords.y, coords.z)
+        DATA_ROUTE.last = vector3(coords.x, coords.y, coords.z)
+    end
+
+    ClearGpsMultiRoute()
+    SetGpsMultiRouteRender(false)
+    StartGpsMultiRoute(26, false, true)
+
+    print(CORE.Shared.DumpTable(DATA_ROUTE.coords))
+    for i, data in ipairs(DATA_ROUTE.coords) do
+        print(i, data)
+        AddPointToGpsMultiRoute(data.x, data.y, data.z)
+    end
+
+    SetGpsMultiRouteRender(true)
+end
+
+RemoveDestionation = function(index)
+    print('rem', DATA_ROUTE.last, DATA_BLIP[index].coords)
+    if DATA_ROUTE.last == DATA_BLIP[index].coords then
+        print('rem1', #DATA_ROUTE.coords)
+        if #DATA_ROUTE.coords - 1 > 1 then
+            print('rem2', DATA_ROUTE.coords[2])
+            DATA_ROUTE.last = DATA_ROUTE.coords[2]
+        else
+            print('rem3')
+            DATA_ROUTE.coords = {}
+            DATA_ROUTE.last = nil
+            ClearGpsMultiRoute()
+        end
+    end
+
+    for i, data in pairs(DATA_ROUTE.coords) do
+        if DATA_BLIP[index].coords == data then
+            DATA_ROUTE.coords[i] = nil
+            DATA_ROUTE.coords = CORE.Shared.SortTableKeys(DATA_ROUTE.coords)
+            RenderRoute()
+        end
+    end
+
+    SetBlipRoute(DATA_BLIP[index].blip, false)
+    RemoveBlip(DATA_BLIP[index].blip)
+    DATA_BLIP[index] = nil
 end
 
 OnBooster = function(state)
@@ -1655,7 +2029,6 @@ OnBooster = function(state)
         CascadeShadowsSetCascadeBoundsScale(5.0)
         SetFlashLightFadeDistance(10.0)
         SetLightsCutoffDistanceTweak(10.0)
-        DistantCopCarSirens(true)
         SetArtificialLightsState(false)
     else
         RopeDrawShadowEnabled(false)
@@ -1668,7 +2041,6 @@ OnBooster = function(state)
         CascadeShadowsSetCascadeBoundsScale(0.0)
         SetFlashLightFadeDistance(0.0)
         SetLightsCutoffDistanceTweak(0.0)
-        DistantCopCarSirens(false)
     end
 
     local pedCoords
@@ -1707,11 +2079,6 @@ OnBooster = function(state)
     end)
 end
 
-PayBill = function(bill)
-    ESX.TriggerServerCallback('esx_billing:payBill', function()
-    end, bill)
-end
-
 StartCooldown = function()
     if not Config.Cooldown then return end
     COOLDOWN = true
@@ -1724,7 +2091,7 @@ StartCooldown = function()
 end
 
 IsGradeAllowed = function()
-    return not not Config.Company.allowedGrades[ESX.PlayerData.job.grade_name]
+    return not not Config.Company.allowedGrades[CORE.Bridge.getVariables().job.grade_name]
 end
 
 IsVehicleValid = function()

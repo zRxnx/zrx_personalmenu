@@ -36,10 +36,10 @@ Config.Navigation = {
     timeout = 120, --| In seconds
     checkDistance = 25, --| In GTA Units
     destinations = { --| Place here your locations
-        { label = 'Police Station', coords = vector3(407.6613, -986.1854, 29.2603-0.9), icon = 'fa-solid fa-building-shield' },
-        { label = 'Medical Center', coords = vector3(291.7147, -586.7615, 43.1760-0.9), icon = 'fa-solid fa-house-medical' },
-        { label = 'Mechanic', coords = vector3(-377.3869, -131.3874, 38.6804-0.9), icon = 'fa-solid fa-toolbox' },
-        { label = 'Meetingpoint', coords = vector3(217.9133, -850.6498, 30.1731-0.9), icon = 'fa-solid fa-location-dot' },
+        { name = 'Police Station', coords = vector3(407.6613, -986.1854, 29.2603-0.9), icon = 'fa-solid fa-building-shield' },
+        { name = 'Medical Center', coords = vector3(291.7147, -586.7615, 43.1760-0.9), icon = 'fa-solid fa-house-medical' },
+        { name = 'Mechanic', coords = vector3(-377.3869, -131.3874, 38.6804-0.9), icon = 'fa-solid fa-toolbox' },
+        { name = 'Meetingpoint', coords = vector3(217.9133, -850.6498, 30.1731-0.9), icon = 'fa-solid fa-location-dot' },
     },
     route = function(coords, text) --| Change it if you know what you are doing
         local blip = AddBlipForCoord(coords.x, coords.y, coords.z)
@@ -52,12 +52,17 @@ Config.Navigation = {
         BeginTextCommandSetBlipName('STRING')
         AddTextComponentSubstringPlayerName(text)
         EndTextCommandSetBlipName(blip)
-        SetBlipRoute(blip, true)
-        SetBlipRouteColour(blip, 26)
 
         return blip
     end
 }
+
+--| Place here your pay bill actions
+Config.PayBill = function(bill)
+    local ESX = exports.es_extended:getSharedObject()
+    ESX.TriggerServerCallback('esx_billing:payBill', function()
+    end, bill)
+end
 
 --| Place here your links/informations
 Config.Information = {
@@ -90,7 +95,7 @@ end
 
 --| Place here your account definition of ESX
 --| Change it if you know what you are doing
-Config.ESXAccounts = {
+Config.Accounts = {
     bank = 'bank',
     money = 'money',
     black_money = 'black_money'
@@ -99,14 +104,21 @@ Config.ESXAccounts = {
 --| Player here your labels for each license
 --| Key is the type, the value is the label
 Config.Licenses = {
-    dmv = 'Theoretical driving test'
+    dmv = 'Theoretical driving test',
+    drive = 'Driver license',
 }
 
 --| Place here your punish actions
 Config.PunishPlayer = function(player, reason)
     if not IsDuplicityVersion() then return end
-    if Webhook.Settings.punish then
-        DiscordLog(player, 'PUNISH', reason, 'punish')
+    if Webhook.Links.punish:len() > 0 then
+        local message = ([[
+            The player got punished
+
+            Reason: **%s**
+        ]]):format(reason)
+
+        CORE.Server.DiscordLog(player, 'Punish', message, Webhook.Links.punish)
     end
 
     DropPlayer(player, reason)
@@ -114,21 +126,12 @@ end
 
 --| Place your checks here before the personal menu opens
 Config.CanOpenMenu = function()
-    return ESX.IsPlayerLoaded()
+    return CORE.Bridge.isPlayerLoaded()
 end
 
 --| Place here your checks before the vehicle menu opens
 Config.CanOpenExtras = function()
     return GetVehicleBodyHealth(GetVehiclePedIsIn(cache.ped, false)) >= 950
-end
-
---| Place here your notification
-Config.Notification = function(player, msg)
-    if IsDuplicityVersion() then
-        TriggerClientEvent('esx:showNotification', player, msg, 'info')
-    else
-        ESX.ShowNotification(msg)
-    end
 end
 
 --| Add here your give keys export
@@ -151,14 +154,4 @@ Config.RemoveVehicleKeys = function(player, vehicle)
     else
         --| exports.wasabi_carlock:RemoveKeys(plate)
     end
-end
-
---| Place here your esx import
---| Change it if you know what you are doing
-Config.EsxImport = function()
-	if IsDuplicityVersion() then
-		return exports.es_extended:getSharedObject()
-	else
-		return exports.es_extended:getSharedObject()
-	end
 end

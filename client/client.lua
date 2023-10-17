@@ -1,21 +1,15 @@
-ESX, COOLDOWN, DATA_ROUTE, DATA_CLOTHING = Config.EsxImport(), false, {}, {}
+CORE = exports.zrx_utility:GetUtility()
+COOLDOWN, DATA_BLIP, DATA_ROUTE, DATA_CLOTHING = false, {}, {}, {}
+DATA_ROUTE.coords = {}
 local GetEntityCoords = GetEntityCoords
 local SetBlipRoute = SetBlipRoute
 local RemoveBlip = RemoveBlip
 local vector3 = vector3
 local Wait = Wait
 
-RegisterNetEvent('esx:playerLoaded',function(xPlayer)
-    ESX.PlayerData = xPlayer
+CORE.Client.RegisterKeyMappingCommand(Config.Command, Strings.cmd_desc, Config.Key, function()
+    OpenMainMenu()
 end)
-
-RegisterNetEvent('esx:setJob', function(job)
-	ESX.PlayerData.job = job
-end)
-
-RegisterCommand(Config.Command, function() OpenMainMenu() end)
-RegisterKeyMapping(Config.Command, Strings.cmd_desc, 'keyboard', Config.Key)
-TriggerEvent('chat:addSuggestion', ('/%s'):format(Config.Command), Strings.cmd_desc, {})
 
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
@@ -82,21 +76,17 @@ CreateThread(function()
     local pedCoords
     while true do
         pedCoords = GetEntityCoords(cache.ped)
-        for k, data in pairs(DATA_ROUTE) do
+        for k, data in pairs(DATA_BLIP) do
             if data.time == 0 then
-                SetBlipRoute(data.blip, false)
-                RemoveBlip(data.blip)
-                DATA_ROUTE[k] = nil
+                RemoveDestionation(k)
 
-                Config.Notification(nil, Strings.navi_timeout)
+                CORE.Bridge.notification(Strings.navi_timeout)
             elseif #(vector3(data.coords.x, data.coords.y, pedCoords.z) - vector3(pedCoords.x, pedCoords.y, pedCoords.z)) < Config.Navigation.checkDistance then
-                SetBlipRoute(data.blip, false)
-                RemoveBlip(data.blip)
-                DATA_ROUTE[k] = nil
+                RemoveDestionation(k)
 
-                Config.Notification(nil, Strings.navi_reached)
+                CORE.Bridge.notification(Strings.navi_reached)
             else
-                DATA_ROUTE[k].time -= 1
+                DATA_BLIP[k].time -= 1
             end
         end
 

@@ -6,24 +6,27 @@ Strings = {
     no_nearby = 'There is no player nearby',
     on_cooldown = 'Calm down!',
     male = 'Male',
-    female = 'female',
+    female = 'Female',
+    not_fill = 'Fullfill the dialog properly',
 
     menu_main = 'Personal menu',
-    menu_info = 'Personal menu - Info',
-    menu_info_lice = 'Personal menu - Informations licenses',
+    menu_info = 'Personal menu - Informations',
+    menu_info_lice = 'Personal menu - Licenses',
     menu_idcard = 'Personal menu - IDCard',
     menu_clothing = 'Personal menu - Clothing',
     menu_veh = 'Personal menu - Vehicle',
-    menu_veh_give = 'Personal menu - Give Vehicle',
-    menu_veh_extra = 'Personal menu - Vehicle extras',
-    menu_veh_livery = 'Personal menu - Vehicle liverys',
-    menu_veh_lights = 'Personal menu - Vehicle lights',
-    menu_veh_win = 'Personal menu - Vehicle windows',
-    menu_veh_doors = 'Personal menu - Vehicle doors',
+    menu_veh_extra = 'Personal menu - Extras',
+    menu_veh_livery = 'Personal menu - Liverys',
+    menu_veh_lights = 'Personal menu - Lights',
+    menu_veh_win = 'Personal menu - Windows',
+    menu_veh_doors = 'Personal menu - Doors',
     menu_setting = 'Personal menu - Settings',
     menu_company = 'Personal menu - Company',
     menu_bills = 'Personal menu - Bills',
     menu_navi = 'Personal menu - Navigation',
+    menu_navi_preset = 'Personal menu - Preset',
+    menu_navi_my = 'Personal menu - My',
+    menu_navi_setting = 'Personal menu - Settings',
 
     info_title = 'Informations',
     info_desc = 'Show your character informations',
@@ -55,7 +58,7 @@ Strings = {
     player_title = 'Player',
     player_desc = 'ID: #%s - Name: %s - Ping: %s', --| arg1: Server ID - arg2: Player Name - arg3: Player ping
 
-    rpname_title = 'Name',
+    rpname_title = 'Firstname - Lastname',
     rpname_desc = '%s', --| arg1: RP Name
 
     dob_title = 'Date Of Birth',
@@ -64,8 +67,8 @@ Strings = {
     height_title = 'Height',
     height_desc = '%s', --| arg1: RP Height
 
-    sex_title = 'Sex',
-    sex_desc = '%s', --| arg1: RP Sex
+    gender_title = 'Gender',
+    gender_desc = '%s', --| arg1: RP Gender
 
     job_title = 'Job',
     job_desc = 'Job: %s', --| arg1: Job name
@@ -228,10 +231,10 @@ Strings = {
     trunk_title = 'Trunk',
     trunk_desc = 'Open/Close trunk',
 
-    all_doors_close_title = 'Open all doors',
+    all_doors_close_title = 'Open doors',
     all_doors_close_desc = 'Open all doors',
 
-    all_doors_open_title = 'Close all doors',
+    all_doors_open_title = 'Close doors',
     all_doors_open_desc = 'Close all doors',
 
     graphic_title = 'Graphicmod',
@@ -274,13 +277,68 @@ Strings = {
     company_not_same = 'You are not in the same company',
     company_not_permitted = 'You are not permitted to do this',
 
+    navi_preset = 'Preset Navigation',
+    navi_preset_desc = 'Open the preset navigation',
+
+    navi_my = 'My Navigation',
+    navi_my_desc = 'Open saved navigation',
+
+    navi_create = 'Create navigation',
+    navi_create_desc = 'Create a new navigation',
+    navi_create_title = 'Create navigation',
+    navi_create_name = 'Name',
+    navi_create_name_desc = 'The navigation name',
+    navi_create_coords = 'Coords',
+    navi_create_coords_desc = 'The navigation coords',
+    navi_create_coords_default = '%s | %s | %s', --| arg1: X Coord - arg2: Y Coord - arg3: Z Coord
+    navi_create_street = 'Street',
+    navi_create_street_desc = 'The street name',
+    navi_create_street_default = '%s', --| arg1: Street name
+
+    navi_manage = 'Click to manage',
+
+    navi_setting = 'Information',
+    navi_setting_desc = 'Hover to see',
+    navi_setting_name = 'Name',
+    navi_setting_name_desc = '%s',
+    navi_setting_coords = 'Coords',
+    navi_setting_coords_desc = '%s | %s | %s', --| arg1: X Coord - arg2: Y Coord - arg3: Z Coord
+    navi_setting_street = 'Street',
+    navi_setting_street_desc = '%s', --| arg1: Street name
+
+    navi_set = 'Waypoint',
+    navi_set_desc = 'Set the waypoint',
+
+    navi_edit = 'Edit',
+    navi_edit_desc = 'Edit the navigation',
+    navi_edit_title = 'Edit navigation',
+    navi_edit_name = 'Name',
+    navi_edit_name_desc = 'The navigation name',
+    navi_edit_coords = 'Coords',
+    navi_edit_coords_desc = 'The navigation coords',
+    navi_edit_coords_default = '%s | %s | %s', --| arg1: X Coord - arg2: Y Coord - arg3: Z Coord
+    navi_edit_street = 'Street',
+    navi_edit_street_desc = 'The street name',
+    navi_edit_street_default = '%s', --| arg1: Street name
+
+    navi_delete = 'Delete',
+    navi_delete_desc = 'Delete the navigation',
+
     navi_desc2 = 'Press to set waypoint',
     navi_dest = 'Destination: %s', --| arg1: Destination name
 
-    navi_set = 'You set a waypoint to %s', --| arg1: Destination name
+    navi_set2 = 'You set a waypoint to %s', --| arg1: Destination name
     navi_timeout = 'Your waypoint got deleted due to timeout!',
     navi_reached = 'You reached your destination!',
-    navi_already = 'You already set a waypoint at %s',
+    navi_street = 'Street',
+    navi_street_desc = '%s', --| arg1: Street name
+
+    navi_clear = 'Clear navigation',
+    navi_clear_desc = 'Clear all your current destinations',
+    navi_clear_notify = 'You cleared your navigation system',
+
+    navi_no = 'No navigation',
+    navi_no_desc = 'You dont have any navigation',
 
     bill_title = 'Bill #%s', --| arg1: Bill ID
     bill_desc = 'Press to pay bill',

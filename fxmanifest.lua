@@ -5,10 +5,10 @@ use_experimental_fxv2_oal 'yes'
 
 author 'zRxnx'
 description 'Advanced personal menu system'
-version '2.2.0'
+version '2.3.0'
 
 dependencies {
-    'es_extended',
+    'zrx_utility',
 	'ox_lib',
     'oxmysql'
 }
@@ -17,7 +17,6 @@ shared_scripts {
     '@ox_lib/init.lua',
     'configuration/config.lua',
     'configuration/strings.lua',
-    'shared/*.lua'
 }
 
 client_scripts {

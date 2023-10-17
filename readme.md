@@ -12,12 +12,14 @@ An advanced personal menu system for FiveM
 - Settings (FPS Booster, Graphicmod)
 - Bills (View, Pay)
 - Company (Society Infos, Hire/Fire/Promote/Derank Player)
-- Navigator (Blips, multiple destinations)
+- Navigator (presets, create/edit/delete own navigator, multiple routes)
 - Server Informations
 - Highly configurable
 - Protected Events
 - Discord log with many information
 - Update checker
+- Optimized
+- Synced
 - 0.0 ms on idle
 - 0.0 ms while in use
 
@@ -29,7 +31,7 @@ An advanced personal menu system for FiveM
 
 ## Requirements
 
-- es_extended (> 1.6.0)
+- zrx_utility (latest)
 - ox_lib (latest)
 - oxmysql (latest)
 - esx_addonaccount (optional)
@@ -37,9 +39,9 @@ An advanced personal menu system for FiveM
 
 ## Preview
 
-### [Video](https://youtu.be/H1BCozrlTGY?si=L9mnTpGWp-GMA1YJ)
+### [Video](https://youtu.be/j_GskkMD2X4?si=Me0IN8cFORnBqMQw)
 
-![Discord Log](https://i.imgur.com/S8Hvzl3.png)
+![Discord Log](https://i.imgur.com/TDfftS2.png)
 ![Main Page](https://i.imgur.com/LexEEA9.png)
 
 ## Installation
