@@ -1,9 +1,9 @@
 CORE = exports.zrx_utility:GetUtility()
-COOLDOWN, DATA_BLIP, DATA_ROUTE, DATA_CLOTHING = false, {}, {}, {}
+COOLDOWN, DATA_BLIP,DATA_ROUTE, DATA_CLOTHING = false, {}, {}, {}
 DATA_ROUTE.coords = {}
 local GetEntityCoords = GetEntityCoords
-local SetBlipRoute = SetBlipRoute
-local RemoveBlip = RemoveBlip
+local ClearGpsMultiRoute = ClearGpsMultiRoute
+local SetGpsMultiRouteRender = SetGpsMultiRouteRender
 local vector3 = vector3
 local Wait = Wait
 
@@ -14,6 +14,9 @@ end)
 AddEventHandler('onResourceStop', function(res)
     if res ~= GetCurrentResourceName() then return end
     if not Config.Menu.clothe then return end
+
+    ClearGpsMultiRoute()
+    SetGpsMultiRouteRender(false)
 
     if DATA_CLOTHING?.arms?.state then
         SetPedComponentVariation(cache.ped, 3, DATA_CLOTHING.arms.drawable, DATA_CLOTHING.arms.texture, 2)

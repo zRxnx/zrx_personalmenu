@@ -1964,10 +1964,10 @@ OpenNavigationPresetMenu = function()
 end
 
 RenderRoute = function(coords)
-    if #DATA_ROUTE.coords < 1 then
+    if not DATA_ROUTE.start then
         local pedCoords = GetEntityCoords(cache.ped)
 
-        DATA_ROUTE.coords[#DATA_ROUTE.coords + 1] = vector3(pedCoords.x, pedCoords.y, pedCoords.z)
+        DATA_ROUTE.start = vector3(pedCoords.x, pedCoords.y, pedCoords.z)
     end
 
     if coords then
@@ -1979,9 +1979,8 @@ RenderRoute = function(coords)
     SetGpsMultiRouteRender(false)
     StartGpsMultiRoute(26, false, true)
 
-    print(CORE.Shared.DumpTable(DATA_ROUTE.coords))
+    AddPointToGpsMultiRoute(DATA_ROUTE.start.x, DATA_ROUTE.start.y, DATA_ROUTE.start.z)
     for i, data in ipairs(DATA_ROUTE.coords) do
-        print(i, data)
         AddPointToGpsMultiRoute(data.x, data.y, data.z)
     end
 
@@ -1989,20 +1988,17 @@ RenderRoute = function(coords)
 end
 
 RemoveDestionation = function(index)
-    print('rem', DATA_ROUTE.last, DATA_BLIP[index].coords)
     if DATA_ROUTE.last == DATA_BLIP[index].coords then
-        print('rem1', #DATA_ROUTE.coords)
-        if #DATA_ROUTE.coords - 1 > 1 then
-            print('rem2', DATA_ROUTE.coords[2])
+        if #DATA_ROUTE.coords > 1 then
             DATA_ROUTE.last = DATA_ROUTE.coords[2]
         else
-            print('rem3')
             DATA_ROUTE.coords = {}
             DATA_ROUTE.last = nil
             ClearGpsMultiRoute()
         end
     end
 
+    DATA_ROUTE.start = nil
     for i, data in pairs(DATA_ROUTE.coords) do
         if DATA_BLIP[index].coords == data then
             DATA_ROUTE.coords[i] = nil
