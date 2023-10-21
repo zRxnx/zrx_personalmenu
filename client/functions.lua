@@ -106,6 +106,98 @@ local CLOTHE_DATA = {
         bracelets = 7,
     },
 
+    ClotheId = {
+        mask = {
+            male = {
+                0, 0
+            },
+            
+            female = {
+                0, 0
+            }
+        },
+
+        arms = {
+            male = {
+                15, 0
+            },
+            
+            female = {
+                15, 0
+            }
+        },
+
+        pants = {
+            male = {
+                21, 0
+            },
+            
+            female = {
+                17, 0
+            }
+        },
+
+        bag = {
+            male = {
+                0, 0
+            },
+            
+            female = {
+                0, 0
+            }
+        },
+
+        shoes = {
+            male = {
+                34, 0
+            },
+            
+            female = {
+                35, 0
+            }
+        },
+
+        neck = {
+            male = {
+                0, 0
+            },
+            
+            female = {
+                0, 0
+            }
+        },
+
+        shirt = {
+            male = {
+                15, 0
+            },
+            
+            female = {
+                14, 0
+            }
+        },
+
+        vest = {
+            male = {
+                0, 0
+            },
+            
+            female = {
+                0, 0
+            }
+        },
+
+        torso = {
+            male = {
+                15, 0
+            },
+            
+            female = {
+                82, 0
+            }
+        },
+    },
+
     Set = {
         hat = {
             off = {
@@ -613,15 +705,15 @@ OpenClotheMenu = function()
         onSelect = function()
             DATA_CLOTHING.isRemoveDisabled = true
 
-            ChangeComponent('set', 'torso', 15, 0)
-            ChangeComponent('set', 'mask', 0, 0)
-            ChangeComponent('set', 'arms', 15, 0)
-            ChangeComponent('set', 'pants', 21, 0)
-            ChangeComponent('set', 'bag', 0, 0)
-            ChangeComponent('set', 'shoes', 34, 0)
-            ChangeComponent('set', 'shirt', 15, 0)
-            ChangeComponent('set', 'vest', 0, 0)
-            ChangeComponent('set', 'neck', 0, 0)
+            ChangeComponent('set', 'torso')
+            ChangeComponent('set', 'mask')
+            ChangeComponent('set', 'arms')
+            ChangeComponent('set', 'pants')
+            ChangeComponent('set', 'bag')
+            ChangeComponent('set', 'shoes')
+            ChangeComponent('set', 'shirt')
+            ChangeComponent('set', 'vest')
+            ChangeComponent('set', 'neck')
             ChangeProp('remove', 'hat')
             ChangeProp('remove', 'glass')
             ChangeProp('remove', 'ears')
@@ -656,7 +748,7 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.mask?.state then
                 ChangeComponent('reset', 'mask')
             else
-                ChangeComponent('set', 'mask', 0, 0)
+                ChangeComponent('set', 'mask')
             end
         end
     }
@@ -702,12 +794,12 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.shirt?.state then
                 ChangeComponent('reset', 'shirt')
                 if not DATA_CLOTHING?.torso?.state then
-                    ChangeComponent('reset', 'arms', -1, -1, true)
+                    ChangeComponent('reset', 'arms', true)
                 end
             else
-                ChangeComponent('set', 'shirt', 15, 0)
+                ChangeComponent('set', 'shirt')
                 if not DATA_CLOTHING?.torso?.state then
-                    ChangeComponent('set', 'arms', 15, 0, true)
+                    ChangeComponent('set', 'arms', true)
                 end
             end
         end
@@ -724,12 +816,12 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.torso?.state then
                 ChangeComponent('reset', 'torso')
                 if not DATA_CLOTHING?.shirt?.state then
-                    ChangeComponent('reset', 'arms', -1, -1, true)
+                    ChangeComponent('reset', 'arms', true)
                 end
             else
                 ChangeComponent('set', 'torso', 15, 0)
                 if not DATA_CLOTHING?.shirt?.state then
-                    ChangeComponent('set', 'arms', 15, 0, true)
+                    ChangeComponent('set', 'arms', true)
                 end
             end
         end
@@ -745,7 +837,7 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.neck?.state then
                 ChangeComponent('reset', 'neck')
             else
-                ChangeComponent('set', 'neck', 0, 0)
+                ChangeComponent('set', 'neck')
             end
         end
     }
@@ -760,7 +852,7 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.vest?.state then
                 ChangeComponent('reset', 'vest')
             else
-                ChangeComponent('set', 'vest', 0, 0)
+                ChangeComponent('set', 'vest')
             end
         end
     }
@@ -775,7 +867,7 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.bag?.state then
                 ChangeComponent('reset', 'bag')
             else
-                ChangeComponent('set', 'bag', 0, 0)
+                ChangeComponent('set', 'bag')
             end
         end
     }
@@ -790,7 +882,7 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.pants?.state then
                 ChangeComponent('reset', 'pants')
             else
-                ChangeComponent('set', 'pants', 21, 0)
+                ChangeComponent('set', 'pants')
             end
         end
     }
@@ -805,7 +897,7 @@ OpenClotheMenu = function()
             if DATA_CLOTHING?.shoes?.state then
                 ChangeComponent('reset', 'shoes')
             else
-                ChangeComponent('set', 'shoes', 34, 0)
+                ChangeComponent('set', 'shoes')
             end
         end
     }
@@ -2101,7 +2193,7 @@ PlayAnimation = function(dict, anim, duration)
     ClearPedTasks(cache.ped)
 end
 
-ChangeComponent = function(action, type, drawable, texture, skipAnim)
+ChangeComponent = function(action, type, skipAnim)
     if action == 'set' then
         DATA_CLOTHING[type] = {
             name = type,
@@ -2114,7 +2206,17 @@ ChangeComponent = function(action, type, drawable, texture, skipAnim)
             PlayAnimation(CLOTHE_DATA.Set[type].dict, CLOTHE_DATA.Set[type].anim, CLOTHE_DATA.Set[type].duration)
         end
 
-        SetPedComponentVariation(cache.ped, CLOTHE_DATA.ComponentId[type], drawable, texture, 2)
+        SetPedComponentVariation(
+            cache.ped,
+            CLOTHE_DATA.ComponentId[type],
+            IsPedMale(cache.ped) and CLOTHE_DATA.ClotheId[type].male[1] or CLOTHE_DATA.ClotheId[type].female[2],
+            IsPedMale(cache.ped) and CLOTHE_DATA.ClotheId[type].male[1] or CLOTHE_DATA.ClotheId[type].female[2],
+            2
+        )
+
+        if type == 'vest' then
+            exports?.zrx_armour:displayArmour(false)
+        end
     elseif action == 'reset' then
         if not DATA_CLOTHING[type]?.drawable or not DATA_CLOTHING[type]?.texture then return end
         if DATA_CLOTHING[type]?.drawable == -1 or DATA_CLOTHING[type]?.texture == -1 then return end
@@ -2122,7 +2224,13 @@ ChangeComponent = function(action, type, drawable, texture, skipAnim)
             PlayAnimation(CLOTHE_DATA.Set[type].dict, CLOTHE_DATA.Set[type].anim, CLOTHE_DATA.Set[type].duration)
         end
 
-        SetPedComponentVariation(cache.ped, CLOTHE_DATA.ComponentId[type], DATA_CLOTHING[type].drawable, DATA_CLOTHING[type].texture, 2)
+        SetPedComponentVariation(
+            cache.ped,
+            CLOTHE_DATA.ComponentId[type],
+            DATA_CLOTHING[type].drawable,
+            DATA_CLOTHING[type].texture,
+            2
+        )
 
         DATA_CLOTHING[type] = {
             name = type,
@@ -2130,6 +2238,10 @@ ChangeComponent = function(action, type, drawable, texture, skipAnim)
             texture = -1,
             state = false
         }
+
+        if type == 'vest' then
+            exports?.zrx_armour:displayArmour(true)
+        end
     end
 end
 
