@@ -57,13 +57,6 @@ Config.Navigation = {
     end
 }
 
---| Place here your pay bill actions
-Config.PayBill = function(bill)
-    local ESX = exports.es_extended:getSharedObject()
-    ESX.TriggerServerCallback('esx_billing:payBill', function()
-    end, bill)
-end
-
 --| Place here your links/informations
 Config.Information = {
     { label = 'Discord', value = 'discord.gg/example' },

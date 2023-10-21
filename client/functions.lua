@@ -1616,7 +1616,7 @@ OpenBillMenu = function()
                 },
                 onSelect = function()
                     COOLDOWN = false
-                    Config.PayBill(data.id)
+                    CORE.Bridge.payBill(data.id)
                     Wait(100)
                     OpenBillMenu()
                 end,
