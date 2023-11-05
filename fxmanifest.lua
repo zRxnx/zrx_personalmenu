@@ -5,7 +5,7 @@ use_experimental_fxv2_oal 'yes'
 
 author 'zRxnx'
 description 'Advanced personal menu system'
-version '2.3.2'
+version '2.4.0'
 
 dependencies {
     'zrx_utility',

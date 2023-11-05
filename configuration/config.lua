@@ -6,7 +6,13 @@ Config.Key = 'F5' --| Note: Its a keymapping
 Config.Cooldown = 3 --| Note: Only for client > server or server > client | To disable set to 0 | In seconds
 Config.CheckForUpdates = true --| Check for updates?
 Config.IconColor  = 'rgba(173, 216, 230, 1)' --| rgba format
+
 Config.Menu = {
+    type = 'context', --| context or menu
+    postition = 'top-left' --| top-left, top-right, bottom-left or bottom-right
+}
+
+Config.Option = {
     player = true,
     clothe = true,
     idcard = true, --| Config.IdcardMenu
@@ -56,6 +62,12 @@ Config.Navigation = {
         return blip
     end
 }
+
+--| Place here your pay bill actions
+Config.PayBill = function(bill)
+    CORE.Framework.TriggerServerCallback('esx_billing:payBill', function()
+    end, bill)
+end
 
 --| Place here your links/informations
 Config.Information = {

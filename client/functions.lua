@@ -81,6 +81,7 @@ local AddPointToGpsMultiRoute = AddPointToGpsMultiRoute
 local SetGpsMultiRouteRender = SetGpsMultiRouteRender
 local SetBlipRoute = SetBlipRoute
 local RemoveBlip = RemoveBlip
+local IsPedMale = IsPedMale
 
 local CLOTHE_DATA = {
     ComponentId = {
@@ -297,7 +298,7 @@ OpenMainMenu = function()
     if not Config.CanOpenMenu() then return end
     local MENU = {}
 
-    if Config.Menu.player then
+    if Config.Option.player then
         MENU[#MENU + 1] = {
             title = Strings.info_title,
             description = Strings.info_desc,
@@ -310,7 +311,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.idcard then
+    if Config.Option.idcard then
         MENU[#MENU + 1] = {
             title = Strings.idcard_title,
             description = Strings.idcard_desc,
@@ -323,7 +324,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.clothe then
+    if Config.Option.clothe then
         MENU[#MENU + 1] = {
             title = Strings.clothe_title,
             description = Strings.clothe_desc,
@@ -336,7 +337,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.settings then
+    if Config.Option.settings then
         MENU[#MENU + 1] = {
             title = Strings.setting_title,
             description = Strings.setting_desc,
@@ -349,7 +350,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.vehicle then
+    if Config.Option.vehicle then
         MENU[#MENU + 1] = {
             title = Strings.veh_title,
             description = Strings.veh_desc,
@@ -363,7 +364,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.bills then
+    if Config.Option.bills then
         MENU[#MENU + 1] = {
             title = Strings.bills_title,
             description = Strings.bills_desc,
@@ -376,7 +377,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.company then
+    if Config.Option.company then
         MENU[#MENU + 1] = {
             title = Strings.company_title,
             description = Strings.company_desc,
@@ -390,7 +391,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.navigation then
+    if Config.Option.navigation then
         MENU[#MENU + 1] = {
             title = Strings.navi_title,
             description = Strings.navi_desc,
@@ -403,7 +404,7 @@ OpenMainMenu = function()
         }
     end
 
-    if Config.Menu.information then
+    if Config.Option.information then
         MENU[#MENU + 1] = {
             title = Strings.information_title,
             description = Strings.information_desc,
@@ -414,13 +415,10 @@ OpenMainMenu = function()
         }
     end
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:main',
         title = Strings.menu_main,
-        options = MENU,
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:main')
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenInfoMenu = function()
@@ -534,14 +532,11 @@ OpenInfoMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:info',
         title = Strings.menu_info,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:main'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:info')
+        menu = 'zrx_personalmenu:personal_menu:main',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenInfoLicenseMenu = function()
@@ -571,14 +566,11 @@ OpenInfoLicenseMenu = function()
         }
     end
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:info:licenses',
         title = Strings.menu_info_lice,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:info'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:info:licenses')
+        menu = 'zrx_personalmenu:personal_menu:info',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenIDcardMenu = function()
@@ -656,14 +648,11 @@ OpenIDcardMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:idcard',
         title = Strings.menu_idcard,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:main'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:idcard')
+        menu = 'zrx_personalmenu:personal_menu:main',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenClotheMenu = function()
@@ -932,14 +921,11 @@ OpenClotheMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:clothing',
         title = Strings.menu_clothing,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:main'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:clothing')
+        menu = 'zrx_personalmenu:personal_menu:main',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 local DATA_ENGINE = true
@@ -1046,14 +1032,11 @@ OpenVehicleMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:vehicle',
         title = Strings.menu_veh,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:main'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:vehicle')
+        menu = 'zrx_personalmenu:personal_menu:main',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenVehicleExtrasMenu = function()
@@ -1087,14 +1070,11 @@ OpenVehicleExtrasMenu = function()
         }
     end
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:vehicle:extras',
         title = Strings.menu_veh_extra,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:vehicle'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:vehicle:extras')
+        menu = 'zrx_personalmenu:personal_menu:vehicle',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenVehicleLiveryMenu = function()
@@ -1132,14 +1112,11 @@ OpenVehicleLiveryMenu = function()
         }
     end
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:vehicle:livery',
         title = Strings.menu_veh_livery,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:vehicle'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:vehicle:livery')
+        menu = 'zrx_personalmenu:personal_menu:vehicle',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 local DATA_LIGHTS = {
@@ -1205,14 +1182,11 @@ OpenVehicleLightsMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:vehicle:lights',
         title = Strings.menu_veh_lights,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:vehicle'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:vehicle:lights')
+        menu = 'zrx_personalmenu:personal_menu:vehicle',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 local DATA_WINDOWS = {
@@ -1328,14 +1302,11 @@ OpenVehicleWindowMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:vehicle:windows',
         title = Strings.menu_veh_win,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:vehicle'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:vehicle:windows')
+        menu = 'zrx_personalmenu:personal_menu:vehicle',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 local DATA_DOORS = {
@@ -1487,14 +1458,11 @@ OpenVehicleDoorsMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:vehicle:doors',
         title = Strings.menu_veh_doors,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:vehicle'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:vehicle:doors')
+        menu = 'zrx_personalmenu:personal_menu:vehicle',
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 local DATA_SETTINGS = {
@@ -1557,14 +1525,11 @@ OpenSettingMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:setting',
         title = Strings.menu_setting,
-        options = MENU,
         menu = 'zrx_personalmenu:personal_menu:main'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:setting')
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenBillMenu = function()
@@ -1616,7 +1581,7 @@ OpenBillMenu = function()
                 },
                 onSelect = function()
                     COOLDOWN = false
-                    CORE.Bridge.payBill(data.id)
+                    Config.PayBill(data.id)
                     Wait(100)
                     OpenBillMenu()
                 end,
@@ -1643,14 +1608,11 @@ OpenBillMenu = function()
         }
     end
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:bills',
         title = Strings.menu_bills,
-        options = MENU,
         menu = 'zrx_personalmenu:personal_menu:main'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:bills')
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenCompanyMenu = function()
@@ -1725,14 +1687,11 @@ OpenCompanyMenu = function()
         end
     }
 
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:company',
         title = Strings.menu_company,
-        options = MENU,
         menu = 'zrx_personalmenu:personal_menu:main'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:company')
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
 OpenNavigationMenu = function()
@@ -1778,15 +1737,317 @@ OpenNavigationMenu = function()
         end
     }
 
-
-    lib.registerContext({
+    CORE.Client.CreateMenu({
         id = 'zrx_personalmenu:personal_menu:navigation',
         title = Strings.menu_navi,
-        options = MENU,
         menu = 'zrx_personalmenu:personal_menu:main'
-    })
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
+end
 
-    lib.showContext('zrx_personalmenu:personal_menu:navigation')
+OpenNavigationMyMenu = function()
+    local MENU = {}
+    local PLAYER_NAVI = lib.callback.await('zrx_personalmenu:server:getPlayerNavigation', 500)
+    local pedCoords = GetEntityCoords(cache.ped)
+    local street = GetStreetNameFromHashKey(GetStreetNameAtCoord(pedCoords.x, pedCoords.y, pedCoords.z))
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_create,
+        description = Strings.navi_create_desc,
+        arrow = true,
+        icon = 'fa-solid fa-plus',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            local input = lib.inputDialog(Strings.navi_create_title, {
+                {
+                    type = 'input',
+                    label = Strings.navi_create_name,
+                    description = Strings.navi_create_name_desc,
+                    required = true,
+                    min = 1,
+                    max = 64
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_create_coords,
+                    description = Strings.navi_create_coords_desc,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_create_coords_default):format(CORE.Shared.RoundNumber(pedCoords.x, 1), CORE.Shared.RoundNumber(pedCoords.y, 1), CORE.Shared.RoundNumber(pedCoords.z, 1))
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_create_street,
+                    description = Strings.navi_create_street,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_create_street_default):format(street)
+                },
+            })
+
+            if not input then
+                CORE.Bridge.notification(Strings.not_fill)
+                return OpenNavigationMyMenu()
+            end
+
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'create', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street)
+        end
+    }
+
+    if #PLAYER_NAVI > 0 then
+        for k, data in pairs(PLAYER_NAVI) do
+            MENU[#MENU + 1] = {
+                title = data.name,
+                description = Strings.navi_manage,
+                arrow = true,
+                icon = 'fa-solid fa-location-dot',
+                iconColor = Config.IconColor,
+                metadata = {
+                    {
+                        label = Strings.navi_street,
+                        value = (Strings.navi_street_desc):format(data.street)
+                    }
+                },
+                args = {
+                    name = data.name,
+                    coords = data.coords,
+                    street = data.street
+                },
+                onSelect = function(args)
+                    OpenNavigationSettingMenu(args)
+                end,
+            }
+        end
+    else
+        MENU[#MENU + 1] = {
+            title = Strings.navi_no,
+            description = Strings.navi_no_desc,
+            arrow = false,
+            icon = 'fa-solid fa-xmark',
+            iconColor = Config.IconColor,
+            readOnly = true,
+        }
+    end
+
+    CORE.Client.CreateMenu({
+        id = 'zrx_personalmenu:personal_menu:navigation:my',
+        title = Strings.menu_navi_my,
+        menu = 'zrx_personalmenu:personal_menu:navigation'
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
+end
+
+OpenNavigationSettingMenu = function(data)
+    local MENU = {}
+    local pedCoords = GetEntityCoords(cache.ped)
+    local street = GetStreetNameFromHashKey(GetStreetNameAtCoord(pedCoords.x, pedCoords.y, pedCoords.z))
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_setting,
+        description = Strings.navi_setting_desc,
+        arrow = false,
+        icon = 'fa-solid fa-circle-info',
+        iconColor = Config.IconColor,
+        readOnly = true,
+        metadata = {
+            {
+                label = Strings.navi_setting_name,
+                value = (Strings.navi_setting_name_desc):format(data.name)
+            },
+            {
+                label = Strings.navi_setting_coords,
+                value = (Strings.navi_setting_coords_desc):format(CORE.Shared.RoundNumber(data.coords.x, 1), CORE.Shared.RoundNumber(data.coords.y, 1), CORE.Shared.RoundNumber(data.coords.z, 1))
+            },
+            {
+                label = Strings.navi_setting_street,
+                value = (Strings.navi_setting_street_desc):format(data.street)
+            }
+        },
+        onSelect = function()
+            OpenNavigationMyMenu()
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_set,
+        description = Strings.navi_set_desc,
+        arrow = true,
+        icon = 'fa-solid fa-location-dot',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(data.name))
+
+            DATA_BLIP[#DATA_BLIP + 1] = {
+                blip = blip,
+                coords = data.coords,
+                time = Config.Navigation.timeout
+            }
+
+            RenderRoute(data.coords)
+            CORE.Bridge.notification((Strings.navi_set2):format(data.name))
+        end,
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_edit,
+        description = Strings.navi_edit_desc,
+        arrow = true,
+        icon = 'fa-solid fa-pen-to-square',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            local input = lib.inputDialog(Strings.navi_edit_title, {
+                {
+                    type = 'input',
+                    label = Strings.navi_edit_name,
+                    description = Strings.navi_edit_name_desc,
+                    required = true,
+                    min = 1,
+                    max = 64
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_edit_coords,
+                    description = Strings.navi_edit_coords_desc,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_edit_coords_default):format(CORE.Shared.RoundNumber(pedCoords.x, 1), CORE.Shared.RoundNumber(pedCoords.y, 1), CORE.Shared.RoundNumber(pedCoords.z, 1))
+                },
+                {
+                    type = 'input',
+                    label = Strings.navi_edit_street,
+                    description = Strings.navi_edit_street_desc,
+                    required = false,
+                    disabled = true,
+                    default = (Strings.navi_edit_street_default):format(street)
+                },
+            })
+
+            if not input then
+                CORE.Bridge.notification(Strings.not_fill)
+                return OpenNavigationMyMenu()
+            end
+
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'edit', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street, {
+                name = data.name,
+                coords = data.coords,
+                street = data.street,
+            })
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.navi_delete,
+        description = Strings.navi_delete_desc,
+        arrow = true,
+        icon = 'fa-solid fa-xmark',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'delete', data.name, data.coords, data.street)
+        end
+    }
+
+    CORE.Client.CreateMenu({
+        id = 'zrx_personalmenu:personal_menu:navigation:setting',
+        title = Strings.menu_navi_setting,
+        menu = 'zrx_personalmenu:personal_menu:navigation:my'
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
+end
+
+OpenNavigationPresetMenu = function()
+    local MENU = {}
+
+    for k, data in pairs(Config.Navigation.destinations) do
+        local disable = false
+
+        for v, data2 in pairs(DATA_BLIP) do
+            if data.coords == data2.coords then
+                disable = true
+            end
+        end
+
+        MENU[#MENU + 1] = {
+            title = data.name,
+            description = Strings.navi_desc2,
+            arrow = false,
+            icon = data.icon or 'fa-solid fa-location-dot',
+            iconColor = Config.IconColor,
+            disabled = disable,
+            metadata = {
+                {
+                    label = Strings.navi_street,
+                    value = (Strings.navi_street_desc):format(GetStreetNameFromHashKey(GetStreetNameAtCoord(data.coords.x, data.coords.y, data.coords.z)))
+                }
+            },
+            args = {
+                name = data.name
+            },
+            onSelect = function(args)
+                local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(args.name))
+
+                DATA_BLIP[#DATA_BLIP + 1] = {
+                    blip = blip,
+                    coords = data.coords,
+                    time = Config.Navigation.timeout
+                }
+
+                RenderRoute(data.coords)
+                CORE.Bridge.notification((Strings.navi_set2):format(data.name))
+            end,
+        }
+    end
+
+    CORE.Client.CreateMenu({
+        id = 'zrx_personalmenu:personal_menu:navigation:preset',
+        title = Strings.menu_navi_preset,
+        menu = 'zrx_personalmenu:personal_menu:navigation'
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
+end
+
+RenderRoute = function(coords)
+    if not DATA_ROUTE.start then
+        local pedCoords = GetEntityCoords(cache.ped)
+
+        DATA_ROUTE.start = vector3(pedCoords.x, pedCoords.y, pedCoords.z)
+    end
+
+    if coords then
+        DATA_ROUTE.coords[#DATA_ROUTE.coords + 1] = vector3(coords.x, coords.y, coords.z)
+        DATA_ROUTE.last = vector3(coords.x, coords.y, coords.z)
+    end
+
+    ClearGpsMultiRoute()
+    SetGpsMultiRouteRender(false)
+    StartGpsMultiRoute(26, false, true)
+
+    AddPointToGpsMultiRoute(DATA_ROUTE.start.x, DATA_ROUTE.start.y, DATA_ROUTE.start.z)
+    for i, data in ipairs(DATA_ROUTE.coords) do
+        AddPointToGpsMultiRoute(data.x, data.y, data.z)
+    end
+
+    SetGpsMultiRouteRender(true)
+end
+
+RemoveDestionation = function(index)
+    if DATA_ROUTE.last == DATA_BLIP[index].coords then
+        if #DATA_ROUTE.coords > 1 then
+            DATA_ROUTE.last = DATA_ROUTE.coords[2]
+        else
+            DATA_ROUTE.coords = {}
+            DATA_ROUTE.last = nil
+            ClearGpsMultiRoute()
+        end
+    end
+
+    DATA_ROUTE.start = nil
+    for i, data in pairs(DATA_ROUTE.coords) do
+        if DATA_BLIP[index].coords == data then
+            DATA_ROUTE.coords[i] = nil
+            DATA_ROUTE.coords = CORE.Shared.SortTableKeys(DATA_ROUTE.coords)
+            RenderRoute()
+        end
+    end
+
+    SetBlipRoute(DATA_BLIP[index].blip, false)
+    RemoveBlip(DATA_BLIP[index].blip)
+    DATA_BLIP[index] = nil
 end
 
 OpenNavigationMyMenu = function()
