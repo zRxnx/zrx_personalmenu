@@ -340,6 +340,10 @@ Strings = {
     navi_no = 'No navigation',
     navi_no_desc = 'You dont have any navigation',
 
+    navi_created = 'You created a new navigation point',
+    navi_edited = 'You edited a navigation point',
+    navi_deleted = 'You deleted the navigation point',
+
     bill_title = 'Bill #%s', --| arg1: Bill ID
     bill_desc = 'Press to pay bill',
     bill_reason = 'Reason',

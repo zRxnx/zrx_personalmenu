@@ -1,3 +1,4 @@
+---@diagnostic disable: param-type-mismatch
 local RopeDrawShadowEnabled = RopeDrawShadowEnabled
 local CascadeShadowsClearShadowSampleType = CascadeShadowsClearShadowSampleType
 local CascadeShadowsSetAircraftMode = CascadeShadowsSetAircraftMode
@@ -82,6 +83,7 @@ local SetGpsMultiRouteRender = SetGpsMultiRouteRender
 local SetBlipRoute = SetBlipRoute
 local RemoveBlip = RemoveBlip
 local IsPedMale = IsPedMale
+local GetResourceState = GetResourceState
 
 local CLOTHE_DATA = {
     ComponentId = {
@@ -808,7 +810,7 @@ OpenClotheMenu = function()
                     ChangeComponent('reset', 'arms', true)
                 end
             else
-                ChangeComponent('set', 'torso', 15, 0)
+                ChangeComponent('set', 'torso')
                 if not DATA_CLOTHING?.shirt?.state then
                     ChangeComponent('set', 'arms', true)
                 end
@@ -1174,10 +1176,10 @@ OpenVehicleLightsMenu = function()
         onSelect = function()
             if DATA_LIGHTS.neon then
                 DATA_LIGHTS.neon = false
-                DisableVehicleNeonLights(cache.vehicle, false, false, false)
+                DisableVehicleNeonLights(cache.vehicle, false)
             else
                 DATA_LIGHTS.neon = true
-                DisableVehicleNeonLights(cache.vehicle, true, false, false)
+                DisableVehicleNeonLights(cache.vehicle, true)
             end
         end
     }
@@ -1336,7 +1338,7 @@ OpenVehicleDoorsMenu = function()
             end
 
             for i = 0, 4 do
-                SetVehicleDoorOpen(cache.vehicle, i, false)
+                SetVehicleDoorOpen(cache.vehicle, i, false, false)
             end
         end
     }
@@ -1352,7 +1354,7 @@ OpenVehicleDoorsMenu = function()
                 DATA_DOORS[i] = false
             end
 
-            SetVehicleDoorsShut(cache.vehicle)
+            SetVehicleDoorsShut(cache.vehicle, false)
         end
     }
 
@@ -1368,7 +1370,7 @@ OpenVehicleDoorsMenu = function()
                 SetVehicleDoorShut(cache.vehicle, 0, false)
             else
                 DATA_DOORS.front_left = true
-                SetVehicleDoorOpen(cache.vehicle, 0, false)
+                SetVehicleDoorOpen(cache.vehicle, 0, false, false)
             end
         end
     }
@@ -1385,7 +1387,7 @@ OpenVehicleDoorsMenu = function()
                 SetVehicleDoorShut(cache.vehicle, 1, false)
             else
                 DATA_DOORS.front_right = true
-                SetVehicleDoorOpen(cache.vehicle, 1, false)
+                SetVehicleDoorOpen(cache.vehicle, 1, false, false)
             end
         end
     }
@@ -1402,7 +1404,7 @@ OpenVehicleDoorsMenu = function()
                 SetVehicleDoorShut(cache.vehicle, 2, false)
             else
                 DATA_DOORS.back_left = true
-                SetVehicleDoorOpen(cache.vehicle, 2, false)
+                SetVehicleDoorOpen(cache.vehicle, 2, false, false)
             end
         end
     }
@@ -1419,7 +1421,7 @@ OpenVehicleDoorsMenu = function()
                 SetVehicleDoorShut(cache.vehicle, 3, false)
             else
                 DATA_DOORS.back_right = true
-                SetVehicleDoorOpen(cache.vehicle, 3, false)
+                SetVehicleDoorOpen(cache.vehicle, 3, false, false)
             end
         end
     }
@@ -1436,7 +1438,7 @@ OpenVehicleDoorsMenu = function()
                 SetVehicleDoorShut(cache.vehicle, 4, false)
             else
                 DATA_DOORS.hood = true
-                SetVehicleDoorOpen(cache.vehicle, 4, false)
+                SetVehicleDoorOpen(cache.vehicle, 4, false, false)
             end
         end
     }
@@ -1453,7 +1455,7 @@ OpenVehicleDoorsMenu = function()
                 SetVehicleDoorShut(cache.vehicle, 5, false)
             else
                 DATA_DOORS.trunk = true
-                SetVehicleDoorOpen(cache.vehicle, 5, false)
+                SetVehicleDoorOpen(cache.vehicle, 5, false, false)
             end
         end
     }
@@ -1789,18 +1791,25 @@ OpenNavigationMyMenu = function()
                 return OpenNavigationMyMenu()
             end
 
-            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'create', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street)
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'create', {
+                name = input[1],
+                coords = pedCoords,
+                street = street,
+                image = RequestScreenshot()
+            }
+)
         end
     }
 
     if #PLAYER_NAVI > 0 then
-        for k, data in pairs(PLAYER_NAVI) do
+        for i, data in ipairs(PLAYER_NAVI) do
             MENU[#MENU + 1] = {
                 title = data.name,
                 description = Strings.navi_manage,
                 arrow = true,
                 icon = 'fa-solid fa-location-dot',
                 iconColor = Config.IconColor,
+                image = data.image,
                 metadata = {
                     {
                         label = Strings.navi_street,
@@ -1810,7 +1819,9 @@ OpenNavigationMyMenu = function()
                 args = {
                     name = data.name,
                     coords = data.coords,
-                    street = data.street
+                    street = data.street,
+                    image = data.image,
+                    id = data.id,
                 },
                 onSelect = function(args)
                     OpenNavigationSettingMenu(args)
@@ -1846,6 +1857,7 @@ OpenNavigationSettingMenu = function(data)
         arrow = false,
         icon = 'fa-solid fa-circle-info',
         iconColor = Config.IconColor,
+        image = data.image,
         readOnly = true,
         metadata = {
             {
@@ -1925,10 +1937,17 @@ OpenNavigationSettingMenu = function(data)
                 return OpenNavigationMyMenu()
             end
 
-            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'edit', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street, {
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'edit', {
+                name = input[1],
+                coords = pedCoords,
+                street = street,
+                image = RequestScreenshot()
+            }, {
+                id = data.id,
                 name = data.name,
                 coords = data.coords,
                 street = data.street,
+                image = data.image,
             })
         end
     }
@@ -1940,7 +1959,13 @@ OpenNavigationSettingMenu = function(data)
         icon = 'fa-solid fa-xmark',
         iconColor = Config.IconColor,
         onSelect = function()
-            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'delete', data.name, data.coords, data.street)
+            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'delete', {}, {
+                id = data.id,
+                name = data.name,
+                coords = data.coords,
+                street = data.street,
+                image = data.image,
+            })
         end
     }
 
@@ -1969,6 +1994,7 @@ OpenNavigationPresetMenu = function()
             arrow = false,
             icon = data.icon or 'fa-solid fa-location-dot',
             iconColor = Config.IconColor,
+            image = data.image,
             disabled = disable,
             metadata = {
                 {
@@ -1999,321 +2025,6 @@ OpenNavigationPresetMenu = function()
         title = Strings.menu_navi_preset,
         menu = 'zrx_personalmenu:personal_menu:navigation'
     }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
-end
-
-RenderRoute = function(coords)
-    if not DATA_ROUTE.start then
-        local pedCoords = GetEntityCoords(cache.ped)
-
-        DATA_ROUTE.start = vector3(pedCoords.x, pedCoords.y, pedCoords.z)
-    end
-
-    if coords then
-        DATA_ROUTE.coords[#DATA_ROUTE.coords + 1] = vector3(coords.x, coords.y, coords.z)
-        DATA_ROUTE.last = vector3(coords.x, coords.y, coords.z)
-    end
-
-    ClearGpsMultiRoute()
-    SetGpsMultiRouteRender(false)
-    StartGpsMultiRoute(26, false, true)
-
-    AddPointToGpsMultiRoute(DATA_ROUTE.start.x, DATA_ROUTE.start.y, DATA_ROUTE.start.z)
-    for i, data in ipairs(DATA_ROUTE.coords) do
-        AddPointToGpsMultiRoute(data.x, data.y, data.z)
-    end
-
-    SetGpsMultiRouteRender(true)
-end
-
-RemoveDestionation = function(index)
-    if DATA_ROUTE.last == DATA_BLIP[index].coords then
-        if #DATA_ROUTE.coords > 1 then
-            DATA_ROUTE.last = DATA_ROUTE.coords[2]
-        else
-            DATA_ROUTE.coords = {}
-            DATA_ROUTE.last = nil
-            ClearGpsMultiRoute()
-        end
-    end
-
-    DATA_ROUTE.start = nil
-    for i, data in pairs(DATA_ROUTE.coords) do
-        if DATA_BLIP[index].coords == data then
-            DATA_ROUTE.coords[i] = nil
-            DATA_ROUTE.coords = CORE.Shared.SortTableKeys(DATA_ROUTE.coords)
-            RenderRoute()
-        end
-    end
-
-    SetBlipRoute(DATA_BLIP[index].blip, false)
-    RemoveBlip(DATA_BLIP[index].blip)
-    DATA_BLIP[index] = nil
-end
-
-OpenNavigationMyMenu = function()
-    local MENU = {}
-    local PLAYER_NAVI = lib.callback.await('zrx_personalmenu:server:getPlayerNavigation', 500)
-    local pedCoords = GetEntityCoords(cache.ped)
-    local street = GetStreetNameFromHashKey(GetStreetNameAtCoord(pedCoords.x, pedCoords.y, pedCoords.z))
-
-    MENU[#MENU + 1] = {
-        title = Strings.navi_create,
-        description = Strings.navi_create_desc,
-        arrow = true,
-        icon = 'fa-solid fa-plus',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            local input = lib.inputDialog(Strings.navi_create_title, {
-                {
-                    type = 'input',
-                    label = Strings.navi_create_name,
-                    description = Strings.navi_create_name_desc,
-                    required = true,
-                    min = 1,
-                    max = 64
-                },
-                {
-                    type = 'input',
-                    label = Strings.navi_create_coords,
-                    description = Strings.navi_create_coords_desc,
-                    required = false,
-                    disabled = true,
-                    default = (Strings.navi_create_coords_default):format(CORE.Shared.RoundNumber(pedCoords.x, 1), CORE.Shared.RoundNumber(pedCoords.y, 1), CORE.Shared.RoundNumber(pedCoords.z, 1))
-                },
-                {
-                    type = 'input',
-                    label = Strings.navi_create_street,
-                    description = Strings.navi_create_street,
-                    required = false,
-                    disabled = true,
-                    default = (Strings.navi_create_street_default):format(street)
-                },
-            })
-
-            if not input then
-                CORE.Bridge.notification(Strings.not_fill)
-                return OpenNavigationMyMenu()
-            end
-
-            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'create', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street)
-        end
-    }
-
-    if #PLAYER_NAVI > 0 then
-        for k, data in pairs(PLAYER_NAVI) do
-            MENU[#MENU + 1] = {
-                title = data.name,
-                description = Strings.navi_manage,
-                arrow = true,
-                icon = 'fa-solid fa-location-dot',
-                iconColor = Config.IconColor,
-                metadata = {
-                    {
-                        label = Strings.navi_street,
-                        value = (Strings.navi_street_desc):format(data.street)
-                    }
-                },
-                args = {
-                    name = data.name,
-                    coords = data.coords,
-                    street = data.street
-                },
-                onSelect = function(args)
-                    OpenNavigationSettingMenu(args)
-                end,
-            }
-        end
-    else
-        MENU[#MENU + 1] = {
-            title = Strings.navi_no,
-            description = Strings.navi_no_desc,
-            arrow = false,
-            icon = 'fa-solid fa-xmark',
-            iconColor = Config.IconColor,
-            readOnly = true,
-        }
-    end
-
-    lib.registerContext({
-        id = 'zrx_personalmenu:personal_menu:navigation:my',
-        title = Strings.menu_navi_my,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:navigation'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:navigation:my')
-end
-
-OpenNavigationSettingMenu = function(data)
-    local MENU = {}
-    local pedCoords = GetEntityCoords(cache.ped)
-    local street = GetStreetNameFromHashKey(GetStreetNameAtCoord(pedCoords.x, pedCoords.y, pedCoords.z))
-
-    MENU[#MENU + 1] = {
-        title = Strings.navi_setting,
-        description = Strings.navi_setting_desc,
-        arrow = false,
-        icon = 'fa-solid fa-circle-info',
-        iconColor = Config.IconColor,
-        readOnly = true,
-        metadata = {
-            {
-                label = Strings.navi_setting_name,
-                value = (Strings.navi_setting_name_desc):format(data.name)
-            },
-            {
-                label = Strings.navi_setting_coords,
-                value = (Strings.navi_setting_coords_desc):format(CORE.Shared.RoundNumber(data.coords.x, 1), CORE.Shared.RoundNumber(data.coords.y, 1), CORE.Shared.RoundNumber(data.coords.z, 1))
-            },
-            {
-                label = Strings.navi_setting_street,
-                value = (Strings.navi_setting_street_desc):format(data.street)
-            }
-        },
-        onSelect = function()
-            OpenNavigationMyMenu()
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.navi_set,
-        description = Strings.navi_set_desc,
-        arrow = true,
-        icon = 'fa-solid fa-location-dot',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(data.name))
-
-            DATA_BLIP[#DATA_BLIP + 1] = {
-                blip = blip,
-                coords = data.coords,
-                time = Config.Navigation.timeout
-            }
-
-            RenderRoute(data.coords)
-            CORE.Bridge.notification((Strings.navi_set2):format(data.name))
-        end,
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.navi_edit,
-        description = Strings.navi_edit_desc,
-        arrow = true,
-        icon = 'fa-solid fa-pen-to-square',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            local input = lib.inputDialog(Strings.navi_edit_title, {
-                {
-                    type = 'input',
-                    label = Strings.navi_edit_name,
-                    description = Strings.navi_edit_name_desc,
-                    required = true,
-                    min = 1,
-                    max = 64
-                },
-                {
-                    type = 'input',
-                    label = Strings.navi_edit_coords,
-                    description = Strings.navi_edit_coords_desc,
-                    required = false,
-                    disabled = true,
-                    default = (Strings.navi_edit_coords_default):format(CORE.Shared.RoundNumber(pedCoords.x, 1), CORE.Shared.RoundNumber(pedCoords.y, 1), CORE.Shared.RoundNumber(pedCoords.z, 1))
-                },
-                {
-                    type = 'input',
-                    label = Strings.navi_edit_street,
-                    description = Strings.navi_edit_street_desc,
-                    required = false,
-                    disabled = true,
-                    default = (Strings.navi_edit_street_default):format(street)
-                },
-            })
-
-            if not input then
-                CORE.Bridge.notification(Strings.not_fill)
-                return OpenNavigationMyMenu()
-            end
-
-            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'edit', input, vector3(pedCoords.x, pedCoords.y, pedCoords.z), street, {
-                name = data.name,
-                coords = data.coords,
-                street = data.street,
-            })
-        end
-    }
-
-    MENU[#MENU + 1] = {
-        title = Strings.navi_delete,
-        description = Strings.navi_delete_desc,
-        arrow = true,
-        icon = 'fa-solid fa-xmark',
-        iconColor = Config.IconColor,
-        onSelect = function()
-            TriggerServerEvent('zrx_personalmenu:server:manageNavigation', 'delete', data.name, data.coords, data.street)
-        end
-    }
-
-    lib.registerContext({
-        id = 'zrx_personalmenu:personal_menu:navigation:setting',
-        title = Strings.menu_navi_setting,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:navigation:my'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:navigation:setting')
-end
-
-OpenNavigationPresetMenu = function()
-    local MENU = {}
-
-    for k, data in pairs(Config.Navigation.destinations) do
-        local disable = false
-
-        for v, data2 in pairs(DATA_BLIP) do
-            if data.coords == data2.coords then
-                disable = true
-            end
-        end
-
-        MENU[#MENU + 1] = {
-            title = data.name,
-            description = Strings.navi_desc2,
-            arrow = false,
-            icon = data.icon or 'fa-solid fa-location-dot',
-            iconColor = Config.IconColor,
-            disabled = disable,
-            metadata = {
-                {
-                    label = Strings.navi_street,
-                    value = (Strings.navi_street_desc):format(GetStreetNameFromHashKey(GetStreetNameAtCoord(data.coords.x, data.coords.y, data.coords.z)))
-                }
-            },
-            args = {
-                name = data.name
-            },
-            onSelect = function(args)
-                local blip = Config.Navigation.route(vector3(data.coords.x, data.coords.y, data.coords.z), (Strings.navi_dest):format(args.name))
-
-                DATA_BLIP[#DATA_BLIP + 1] = {
-                    blip = blip,
-                    coords = data.coords,
-                    time = Config.Navigation.timeout
-                }
-
-                RenderRoute(data.coords)
-                CORE.Bridge.notification((Strings.navi_set2):format(data.name))
-            end,
-        }
-    end
-
-    lib.registerContext({
-        id = 'zrx_personalmenu:personal_menu:navigation:preset',
-        title = Strings.menu_navi_preset,
-        options = MENU,
-        menu = 'zrx_personalmenu:personal_menu:navigation'
-    })
-
-    lib.showContext('zrx_personalmenu:personal_menu:navigation:preset')
 end
 
 RenderRoute = function(coords)
@@ -2398,7 +2109,7 @@ OnBooster = function(state)
             pedCoords = GetEntityCoords(cache.ped)
             DisableOcclusionThisFrame()
             SetDisableDecalRenderingThisFrame()
-            RemoveParticleFxInRange(vector3(pedCoords.x, pedCoords.y, pedCoords.z), 10.0)
+            RemoveParticleFxInRange(pedCoords.x, pedCoords.y, pedCoords.z, 10.0)
             OverrideLodscaleThisFrame(0.4)
             SetArtificialLightsState(true)
             ClearAllBrokenGlass()
@@ -2549,4 +2260,26 @@ ChangeProp = function(action, type, drawable, texture, skipAnim)
             state = false
         }
     end
+end
+
+RequestScreenshot = function()
+    if not Config.UseScreenshot then
+        return ''
+    elseif GetResourceState('screenshot-basic') == 'missing' then
+        return ''
+    end
+
+    local img = lib.callback.await('zrx_personalmenu:server:getImageWebhook', 500)
+
+    if img:len() <= 0 then
+        return ''
+    end
+
+    local p = promise.new()
+
+    exports['screenshot-basic']:requestScreenshotUpload(img, 'files[]', function(data)
+        p:resolve(json.decode(data).attachments[1].url)
+    end)
+
+    return Citizen.Await(p)
 end

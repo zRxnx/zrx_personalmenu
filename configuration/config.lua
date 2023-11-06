@@ -6,6 +6,7 @@ Config.Key = 'F5' --| Note: Its a keymapping
 Config.Cooldown = 3 --| Note: Only for client > server or server > client | To disable set to 0 | In seconds
 Config.CheckForUpdates = true --| Check for updates?
 Config.IconColor  = 'rgba(173, 216, 230, 1)' --| rgba format
+Config.UseScreenshot = true --| If enabled it will display a picture when you create a navi | NEEDS screenshot-basic
 
 Config.Menu = {
     type = 'context', --| context or menu
@@ -42,10 +43,10 @@ Config.Navigation = {
     timeout = 120, --| In seconds
     checkDistance = 25, --| In GTA Units
     destinations = { --| Place here your locations
-        { name = 'Police Station', coords = vector3(407.6613, -986.1854, 29.2603-0.9), icon = 'fa-solid fa-building-shield' },
-        { name = 'Medical Center', coords = vector3(291.7147, -586.7615, 43.1760-0.9), icon = 'fa-solid fa-house-medical' },
-        { name = 'Mechanic', coords = vector3(-377.3869, -131.3874, 38.6804-0.9), icon = 'fa-solid fa-toolbox' },
-        { name = 'Meetingpoint', coords = vector3(217.9133, -850.6498, 30.1731-0.9), icon = 'fa-solid fa-location-dot' },
+        { name = 'Police Station', coords = vector3(407.6613, -986.1854, 29.2603-0.9), icon = 'fa-solid fa-building-shield', image = '' },
+        { name = 'Medical Center', coords = vector3(291.7147, -586.7615, 43.1760-0.9), icon = 'fa-solid fa-house-medical', image = '' },
+        { name = 'Mechanic', coords = vector3(-377.3869, -131.3874, 38.6804-0.9), icon = 'fa-solid fa-toolbox', image = '' },
+        { name = 'Meetingpoint', coords = vector3(217.9133, -850.6498, 30.1731-0.9), icon = 'fa-solid fa-location-dot', image = '' },
     },
     route = function(coords, text) --| Change it if you know what you are doing
         local blip = AddBlipForCoord(coords.x, coords.y, coords.z)

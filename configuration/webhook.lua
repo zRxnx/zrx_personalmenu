@@ -9,4 +9,6 @@ Webhook.Links = {
     createNav = '',
     deleteNav = '',
     editNav = '',
+
+    imageStorage = '', --| Note its client side available
 }

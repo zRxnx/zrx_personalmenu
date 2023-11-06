@@ -1,7 +1,9 @@
+---@diagnostic disable: cast-local-type, need-check-nil
 CORE = exports.zrx_utility:GetUtility()
 COOLDOWN, PLAYER_CACHE = {}, {}
 local GetPlayers = GetPlayers
 local GetPlayerPing = GetPlayerPing
+local vector3 = vector3
 
 RegisterNetEvent('zrx_utility:bridge:playerLoaded', function(player, xPlayer, isNew)
     PLAYER_CACHE[player] = CORE.Server.GetPlayerCache(player)
@@ -14,9 +16,10 @@ CreateThread(function()
 
     MySQL.Sync.execute([[
         CREATE Table IF NOT EXISTS `zrx_personalmenu` (
+            `id` int(100) NOT NULL AUTO_INCREMENT,
             `identifier` varchar(255) DEFAULT NULL,
             `data` longtext DEFAULT NULL,
-            PRIMARY KEY (`identifier`)
+            PRIMARY KEY (`id`)
         ) ENGINE=InnoDB;
     ]])
 
@@ -24,6 +27,10 @@ CreateThread(function()
         player = tonumber(player)
         PLAYER_CACHE[player] = CORE.Server.GetPlayerCache(player)
     end
+end)
+
+lib.callback.register('zrx_personalmenu:server:getImageWebhook', function()
+    return Webhook.Links.imageStorage
 end)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerData', function(player)
@@ -95,19 +102,23 @@ end)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerNavigation', function(player)
     if Player.HasCooldown(player) then return {} end
-    local response = MySQL.query.await('SELECT `data` FROM `zrx_personalmenu` WHERE `identifier` = ?', {
+    local response = MySQL.query.await('SELECT `id`, `data` FROM `zrx_personalmenu` WHERE `identifier` = ?', {
         PLAYER_CACHE[player].license
     })
 
     if response[1] then
         local OUTPUT = {}
-        local data = json.decode(response[1].data)
+        local data2
 
-        for k, data2 in pairs(data) do
-            OUTPUT[#OUTPUT + 1] = {
+        for i, data in pairs(response) do
+            data2 = json.decode(data.data)
+
+            OUTPUT[i] = {
+                id = data.id,
                 name = data2.name,
                 coords = vector3(data2.coords.x, data2.coords.y, data2.coords.z),
-                street = data2.street
+                street = data2.street,
+                image = data2.image
             }
         end
 
@@ -136,109 +147,56 @@ RegisterNetEvent('zrx_personalmenu:server:managePlayer', function(target, action
     end
 end)
 
-RegisterNetEvent('zrx_personalmenu:server:manageNavigation', function(action, name, coords, street, old)
+RegisterNetEvent('zrx_personalmenu:server:manageNavigation', function(action, data, old)
     local player = source
     if action ~= 'edit' and action ~= 'create' and action ~= 'delete' or
-    type(action) ~= 'string' and type(coords) ~= 'string' and type(street) ~= 'string' then
+    type(action) ~= 'string' and type(data.coords) ~= 'string' and type(data.street) ~= 'string' then
         return Config.PunishPlayer(player, 'Tried to trigger "zrx_personalmenu:server:manageNavigation"')
     end
 
-    local DATA = {}
-    local response = MySQL.query.await('SELECT `data` FROM `zrx_personalmenu` WHERE `identifier` = ?', {
-        PLAYER_CACHE[player].license
-    })
+    if action == 'create' then
+        if Webhook.Links.createNav:len() > 0 then
+            local message = ([[
+                The player created a navigation
+    
+                Name: **%s**
+                Coords: **%s**
+                Street: **%s**
+            ]]):format(data.name, data.coords, data.street)
 
-    if action == 'edit' or action == 'create' then
-        DATA[#DATA + 1] = {
-            name = name[1],
-            coords = coords,
-            street = street,
-        }
-
-        if action == 'create' then
-            if Webhook.Links.createNav:len() > 0 then
-                local message = ([[
-                    The player created a navigation
-        
-                    Name: **%s**
-                    Coords: **%s**
-                    Street: **%s**
-                ]]):format(name, coords, street)
-
-                CORE.Server.DiscordLog(player, 'CREATE NAVIGATION', message, Webhook.Links.createNav)
-            end
-
-            CORE.Bridge.notification(player, 'You made a new navigation point')
-        elseif action == 'edit' then
-            if Webhook.Links.editNav:len() > 0 then
-                local message = ([[
-                    The player edited a navigation
-        
-                    New
-                    Name: **%s**
-                    Coords: **%s**
-                    Street: **%s**
-
-                    Old
-                    Name: **%s**
-                    Coords: **%s**
-                    Street: **%s**
-                ]]):format(name, coords, street, old.name, old.coords, old.street)
-
-                CORE.Server.DiscordLog(player, 'EDIT NAVIGATION', message, Webhook.Links.editNav)
-            end
-
-            CORE.Bridge.notification(player, 'You edited a navigation point')
+            CORE.Server.DiscordLog(player, 'CREATE NAVIGATION', message, Webhook.Links.createNav)
         end
 
-        if response[1] then
-            local data = json.decode(response[1].data)
+        CORE.Bridge.notification(player, Strings.navi_created)
 
-            if old then
-                for k, data2 in pairs(data) do
-                    if data2.name ~= old.name and data2.coords ~= old.coords and data2.street ~= old.street then
-                        DATA[#DATA + 1] = {
-                            name = data2.name,
-                            coords = data2.coords,
-                            street = data2.street
-                        }
-                    end
-                end
-            else
-                for k, data2 in pairs(data) do
-                    DATA[#DATA + 1] = {
-                        name = data2.name,
-                        coords = data2.coords,
-                        street = data2.street
-                    }
-                end
-            end
+        MySQL.insert.await('INSERT INTO `zrx_personalmenu` (identifier, data) VALUES (?, ?)', {
+            PLAYER_CACHE[player].license, json.encode(data)
+        })
+    elseif action == 'edit' then
+        if Webhook.Links.editNav:len() > 0 then
+            local message = ([[
+                The player edited a navigation
+    
+                New
+                Name: **%s**
+                Coords: **%s**
+                Street: **%s**
 
-            MySQL.update.await('UPDATE zrx_personalmenu SET data = ? WHERE identifier = ?', {
-                json.encode(DATA), PLAYER_CACHE[player].license
-            })
-        else
-            MySQL.insert.await('INSERT INTO `zrx_personalmenu` (identifier, data) VALUES (?, ?)', {
-                PLAYER_CACHE[player].license, json.encode(DATA)
-            })
+                Old
+                Name: **%s**
+                Coords: **%s**
+                Street: **%s**
+            ]]):format(data.name, data.coords, data.street, old.name, old.coords, old.street)
+
+            CORE.Server.DiscordLog(player, 'EDIT NAVIGATION', message, Webhook.Links.editNav)
         end
+
+        CORE.Bridge.notification(player, Strings.navi_edited)
+
+        MySQL.update.await('UPDATE zrx_personalmenu SET data = ? WHERE id = ?', {
+            json.encode(data), old.id
+        })
     elseif action == 'delete' then
-        local data = json.decode(response[1].data)
-
-        for k, data2 in pairs(data) do
-            if data2.name ~= name and data2.coords ~= coords and data2.street ~= street then
-                DATA[#DATA + 1] = {
-                    name = data2.name,
-                    coords = data2.coords,
-                    street = data2.street
-                }
-            end
-
-            MySQL.update.await('UPDATE zrx_personalmenu SET data = ? WHERE identifier = ?', {
-                json.encode(DATA), PLAYER_CACHE[player].license
-            })
-        end
-
         if Webhook.Links.deleteNav:len() > 0 then
             local message = ([[
                 The player deleted a navigation
@@ -246,12 +204,16 @@ RegisterNetEvent('zrx_personalmenu:server:manageNavigation', function(action, na
                 Name: **%s**
                 Coords: **%s**
                 Street: **%s**
-            ]]):format(name, coords, street)
+            ]]):format(data.name, data.coords, data.street)
 
             CORE.Server.DiscordLog(player, 'DELETE NAVIGATION', message, Webhook.Links.deleteNav)
         end
 
-        CORE.Bridge.notification(player, 'You delete the navigation point')
+        CORE.Bridge.notification(player, Strings.navi_deleted)
+
+        MySQL.update.await('DELETE FROM `zrx_personalmenu` WHERE `id` = ?', {
+            old.id
+        })
     end
 end)
 
