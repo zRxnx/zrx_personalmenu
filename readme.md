@@ -13,6 +13,7 @@ An advanced personal menu system for FiveM
 - Bills (View, Pay)
 - Company (Society Infos, Hire/Fire/Promote/Derank Player)
 - Navigator (presets, create/edit/delete own navigator, multiple routes)
+- Rockstar Editor (Record, Save, Delete & Edit)
 - Server Informations
 - Highly configurable
 - Protected Events

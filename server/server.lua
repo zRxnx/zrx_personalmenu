@@ -227,8 +227,8 @@ RegisterNetEvent('zrx_personalmenu:server:giveCar', function(target, plate)
 
         MySQL.update.await('UPDATE `owned_vehicles` SET `owner` = ? WHERE `plate` = ?', { xTarget.identifier, plate })
 
-        Config.RemoveVehicleKeys(xPlayer.player, plate)
-        Config.GiveVehicleKeys(xTarget.player, plate)
+        Config.VehicleKeys('remove', xPlayer.player, plate)
+        Config.VehicleKeys('add', xTarget.player, plate)
 
         CORE.Bridge.notification(xTarget.player, (Strings.give_got):format(xPlayer.name, plate))
         CORE.Bridge.notification(xPlayer.player, (Strings.give_given):format(plate, xTarget.name))

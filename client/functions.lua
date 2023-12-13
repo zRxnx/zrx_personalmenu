@@ -406,6 +406,19 @@ OpenMainMenu = function()
         }
     end
 
+    if Config.Option.editor then
+        MENU[#MENU + 1] = {
+            title = Strings.editor_title,
+            description = Strings.editor_desc,
+            arrow = true,
+            icon = 'fa-solid fa-pen-to-square',
+            iconColor = Config.IconColor,
+            onSelect = function()
+                OpenEditorMenu()
+            end
+        }
+    end
+
     if Config.Option.information then
         MENU[#MENU + 1] = {
             title = Strings.information_title,
@@ -954,7 +967,7 @@ OpenVehicleMenu = function()
                 while not DATA_ENGINE and IsVehicleValid() do
                     SetVehicleEngineOn(cache.vehicle, false, false, false)
                     SetVehicleUndriveable(cache.vehicle, true)
-                    Wait()
+                    Wait(0)
                 end
             else
                 DATA_ENGINE = true
@@ -1696,6 +1709,62 @@ OpenCompanyMenu = function()
     }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
 end
 
+OpenEditorMenu = function()
+    local MENU = {}
+
+    MENU[#MENU + 1] = {
+        title = Strings.editor_record,
+        description = Strings.editor_record_desc,
+        arrow = false,
+        icon = 'fa-solid fa-video',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            StartRecording(1)
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.editor_save,
+        description = Strings.editor_save_desc,
+        arrow = false,
+        icon = 'fa-solid fa-floppy-disk',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            StartRecording(0)
+            StopRecordingAndSaveClip()
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.editor_delete,
+        description = Strings.editor_delete_desc,
+        arrow = false,
+        icon = 'fa-solid fa-trash',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            StopRecordingAndDiscardClip()
+        end
+    }
+
+    MENU[#MENU + 1] = {
+        title = Strings.editor_open,
+        description = Strings.editor_open_desc,
+        arrow = false,
+        icon = 'fa-solid fa-arrow-up-right-from-square',
+        iconColor = Config.IconColor,
+        onSelect = function()
+            NetworkSessionLeaveSinglePlayer()
+            ActivateRockstarEditor()
+        end
+    }
+
+    CORE.Client.CreateMenu({
+        id = 'zrx_personalmenu:personal_menu:editor',
+        title = Strings.menu_editor,
+        menu = 'zrx_personalmenu:personal_menu:main'
+    }, MENU, Config.Menu.type ~= 'menu', Config.Menu.postition)
+end
+
 OpenNavigationMenu = function()
     local MENU = {}
 
@@ -2134,7 +2203,7 @@ OnBooster = function(state)
             DisableScreenblurFade()
             SetRainLevel(0.0)
             SetWindSpeed(0.0)
-            Wait()
+            Wait(0)
         end
     end)
 end

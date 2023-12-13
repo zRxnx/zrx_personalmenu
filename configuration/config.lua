@@ -22,6 +22,7 @@ Config.Option = {
     bills = true,
     company = true, --| Config.Company
     navigation = true, --| Config.Navigation
+    editor = true,
     information = true, --| Config.Information
 }
 
@@ -77,20 +78,20 @@ Config.Information = {
 }
 
 --| Place here your idcard actions
-Config.IdcardMenu = function(type, target)
-    if type == 'idcard' then
+Config.IdcardMenu = function(action, target)
+    if action == 'idcard' then
         if target then
             TriggerServerEvent('jsfour-idcard:open', cache.serverId, target)
         else
             TriggerServerEvent('jsfour-idcard:open', cache.serverId, cache.serverId)
         end
-    elseif type == 'driver' then
+    elseif action == 'driver' then
         if target then
             TriggerServerEvent('jsfour-idcard:open', cache.serverId, target, 'driver')
         else
             TriggerServerEvent('jsfour-idcard:open', cache.serverId, cache.serverId, 'driver')
         end
-    elseif type == 'weapon' then
+    elseif action == 'weapon' then
         if target then
             TriggerServerEvent('jsfour-idcard:open', cache.serverId, target, 'weapon')
         else
@@ -140,24 +141,21 @@ Config.CanOpenExtras = function()
     return GetVehicleBodyHealth(GetVehiclePedIsIn(cache.ped, false)) >= 950
 end
 
---| Add here your give keys export
-Config.GiveVehicleKeys = function(player, vehicle)
+--| Add here your add/remove key export
+Config.VehicleKeys = function(action, player, vehicle)
     local plate = GetVehicleNumberPlateText(vehicle)
 
     if IsDuplicityVersion() then
-        --| exports.wasabi_carlock:GiveKey(plate, player)
-    else
-        --| exports.wasabi_carlock:GiveKey(plate)
-    end
-end
+        if action == 'add' then
 
---| Add here your remove key export
-Config.RemoveVehicleKeys = function(player, vehicle)
-    local plate = GetVehicleNumberPlateText(vehicle)
+        elseif action == 'remove' then
 
-    if IsDuplicityVersion() then
-        --| exports.wasabi_carlock:RemoveKeys(plate, player)
+        end
     else
-        --| exports.wasabi_carlock:RemoveKeys(plate)
+        if action == 'add' then
+
+        elseif action == 'remove' then
+
+        end
     end
 end

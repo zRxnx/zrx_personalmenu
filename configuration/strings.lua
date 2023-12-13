@@ -27,6 +27,7 @@ Strings = {
     menu_navi_preset = 'Personal menu - Preset',
     menu_navi_my = 'Personal menu - My',
     menu_navi_setting = 'Personal menu - Settings',
+    menu_editor = 'Personal menu - Editor',
 
     info_title = 'Informations',
     info_desc = 'Show your character informations',
@@ -351,4 +352,16 @@ Strings = {
     bill_amount_value = '$%s', --| arg1: Bill amount
     bill_no = 'No bills',
     bill_no_desc = 'You dont have any bills',
+
+    editor_title = 'Editor',
+    editor_desc = 'Open the editor menu',
+
+    editor_record = 'Record',
+    editor_record_desc = 'Start the recording',
+    editor_save = 'Save clip',
+    editor_save_desc = 'Save the current clip',
+    editor_delete = 'Delete clip',
+    editor_delete_desc = 'Delete the current clip',
+    editor_open = 'Open editor',
+    editor_open_desc = 'Open the editor menu',
 }

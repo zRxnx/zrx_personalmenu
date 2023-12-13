@@ -10,5 +10,5 @@ Webhook.Links = {
     deleteNav = '',
     editNav = '',
 
-    imageStorage = '', --| Note its client side available
+    imageStorage = '', --| Note its client side accessable
 }
