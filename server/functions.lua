@@ -5,12 +5,12 @@ Player = {
         if not IsGradeAllowed(xJob) then
             CORE.Bridge.notification(xPlayer.source, Strings.company_not_permitted)
         elseif xJob.name == yJob.name then
-            CORE.Bridge.notification(xPlayer.source, (Strings.company_hire_already):format(xTarget.getName()))
+            CORE.Bridge.notification(xPlayer.source, (Strings.company_hire_already):format(xTarget.name))
         else
-            CORE.Bridge.setJob(xTarget.player, xJob.name, 0)
+            xTarget.setJob(xJob.name, 0)
 
-            CORE.Bridge.notification(xPlayer.source, (Strings.company_you_hired):format(xTarget.getName()))
-            CORE.Bridge.notification(xTarget.source, (Strings.company_by_hired):format(xPlayer.getName()))
+            CORE.Bridge.notification(xPlayer.source, (Strings.company_you_hired):format(xTarget.name))
+            CORE.Bridge.notification(xTarget.source, (Strings.company_by_hired):format(xPlayer.name))
 
             if Webhook.Links.company:len() > 0 then
                 local message = ([[
@@ -35,14 +35,14 @@ Player = {
         elseif xJob.name ~= yJob.name then
             CORE.Bridge.notification(xPlayer.source, Strings.company_not_same)
         elseif xJob.name == yJob.name then
-            if CORE.Bridge.doesJobExist(Config.Company.default.job, Config.Company.default.grade) then
-                CORE.Bridge.setJob(xTarget.player, Config.Company.default.job, Config.Company.default.grade)
+            if CORE.Bridge.getJobObject(Config.Company.default.job, Config.Company.default.grade).doesJobExist() then
+                xTarget.setJob(Config.Company.default.job, Config.Company.default.grade)
             else
-                CORE.Bridge.setJob(xTarget.player, 'unemployed', 0)
+                xTarget.setJob('unemployed', 0)
             end
 
-            CORE.Bridge.notification(xPlayer.source, (Strings.company_you_fired):format(xTarget.getName()))
-            CORE.Bridge.notification(xTarget.source, (Strings.company_by_fired):format(xPlayer.getName()))
+            CORE.Bridge.notification(xPlayer.source, (Strings.company_you_fired):format(xTarget.name))
+            CORE.Bridge.notification(xTarget.source, (Strings.company_by_fired):format(xPlayer.name))
 
             if Webhook.Links.company:len() > 0 then
                 local message = ([[
@@ -70,10 +70,10 @@ Player = {
             local grade = xJob.grade + 1
 
             if CORE.Bridge.doesJobExist(xJob.name, grade) then
-                CORE.Bridge.setJob(xTarget.player, xJob.name, grade)
+                xTarget.setJob(xJob.name, grade)
 
-                CORE.Bridge.notification(xPlayer.source, (Strings.company_you_promote):format(xTarget.getName(), xJob.grade_label, grade))
-                CORE.Bridge.notification(xTarget.source, (Strings.company_by_promote):format(xPlayer.getName(), xJob.grade_label, grade))
+                CORE.Bridge.notification(xPlayer.source, (Strings.company_you_promote):format(xTarget.name, xJob.grade_label, grade))
+                CORE.Bridge.notification(xTarget.source, (Strings.company_by_promote):format(xPlayer.name, xJob.grade_label, grade))
 
                 if Webhook.Links.company:len() > 0 then
                     local message = ([[
@@ -104,10 +104,10 @@ Player = {
             local grade = xJob.grade - 1
 
             if CORE.Bridge.doesJobExist(xJob.name, grade) then
-                CORE.Bridge.setJob(xTarget.player, xJob.name, grade)
+                xTarget.setJob(xJob.name, grade)
 
-                CORE.Bridge.notification(xPlayer.source, (Strings.company_you_derank):format(xTarget.getName(), xJob.grade_label, grade))
-                CORE.Bridge.notification(xTarget.source, (Strings.company_by_derank):format(xPlayer.getName(), xJob.grade_label, grade))
+                CORE.Bridge.notification(xPlayer.source, (Strings.company_you_derank):format(xTarget.name, xJob.grade_label, grade))
+                CORE.Bridge.notification(xTarget.source, (Strings.company_by_derank):format(xPlayer.name, xJob.grade_label, grade))
 
                 if Webhook.Links.company:len() > 0 then
                     local message = ([[

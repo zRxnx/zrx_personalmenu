@@ -35,7 +35,7 @@ end)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerData', function(player)
     if Player.HasCooldown(player) then return {} end
-    local xPlayer = CORE.Bridge.getVariables(player)
+    local xPlayer = CORE.Bridge.getPlayerObject(player)
 
     if Webhook.Links.callback:len() > 0 then
         local message = [[
@@ -50,9 +50,9 @@ lib.callback.register('zrx_personalmenu:server:getPlayerData', function(player)
         name = xPlayer.name,
         dob = xPlayer.dob,
         height = xPlayer.height,
-        bank = CORE.Bridge.getAccount(xPlayer.player, Config.Accounts.bank).money,
-        money = CORE.Bridge.getAccount(xPlayer.player, Config.Accounts.money).money,
-        black_money = CORE.Bridge.getAccount(xPlayer.player, Config.Accounts.black_money).money,
+        bank = xPlayer.getAccount(Config.Accounts.bank).money,
+        money = xPlayer.getAccount(Config.Accounts.money).money,
+        black_money = xPlayer.getAccount(Config.Accounts.black_money).money,
         ping = GetPlayerPing(xPlayer.player)
     }
 end)
@@ -67,7 +67,7 @@ lib.callback.register('zrx_personalmenu:server:getPlayerBills', function(player)
         CORE.Server.DiscordLog(player, 'BILLS', message, Webhook.Links.callback)
     end
 
-    return CORE.Bridge.getBills(player)
+    return CORE.Bridge.getPlayerObject(player).getBills()
 end)
 
 lib.callback.register('zrx_personalmenu:server:getPlayerLicenses', function(player)
@@ -80,7 +80,7 @@ lib.callback.register('zrx_personalmenu:server:getPlayerLicenses', function(play
         CORE.Server.DiscordLog(player, 'LICENSES', message, Webhook.Links.callback)
     end
 
-    return CORE.Bridge.getLicenses(player)
+    return CORE.Bridge.getPlayerObject(player).getLicenses()
 end)
 
 lib.callback.register('zrx_personalmenu:server:getSocietyData', function(player, job)
@@ -96,7 +96,7 @@ lib.callback.register('zrx_personalmenu:server:getSocietyData', function(player,
     end
 
     return {
-        money = CORE.Bridge.getSocietyMoney(job)
+        money = CORE.Bridge.getSocietyObject(job).getSocietyMoney()
     }
 end)
 
@@ -134,7 +134,7 @@ RegisterNetEvent('zrx_personalmenu:server:managePlayer', function(target, action
         return Config.PunishPlayer(source, 'Tried to trigger "zrx_personalmenu:server:managePlayer"')
     end
 
-    local xPlayer, xTarget = CORE.Bridge.getVariable(source), CORE.Bridge.getVariable(target)
+    local xPlayer, xTarget = CORE.Bridge.getPlayerObject(source), CORE.Bridge.getPlayerObject(target)
 
     if action == 'hire' then
         Player.Hire(xPlayer, xTarget)
@@ -219,11 +219,11 @@ end)
 
 RegisterNetEvent('zrx_personalmenu:server:giveCar', function(target, plate)
     if not target or not plate then return end
-	local xPlayer = CORE.Bridge.getVariable(source)
+	local xPlayer = CORE.Bridge.getPlayerObject(source)
     local row = MySQL.single.await('SELECT `plate`, `owner` FROM `owned_vehicles` WHERE `plate` = ? LIMIT 1', { plate })
 
     if row?.plate == plate and row?.owner == xPlayer.identifier then
-        local xTarget = CORE.Bridge.getVariable(target)
+        local xTarget = CORE.Bridge.getPlayerObject(target)
 
         MySQL.update.await('UPDATE `owned_vehicles` SET `owner` = ? WHERE `plate` = ?', { xTarget.identifier, plate })
 

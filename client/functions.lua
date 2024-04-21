@@ -484,7 +484,7 @@ OpenInfoMenu = function()
 
     MENU[#MENU + 1] = {
         title = Strings.gender_title,
-        description = (Strings.gender_desc):format(CORE.Bridge.getVariables().sex == 'm' and Strings.male or Strings.female),
+        description = (Strings.gender_desc):format(CORE.Bridge.getPlayerObject().sex == 'm' and Strings.male or Strings.female),
         arrow = false,
         icon = 'fa-solid fa-genderless',
         iconColor = Config.IconColor,
@@ -1596,7 +1596,7 @@ OpenBillMenu = function()
                 },
                 onSelect = function()
                     COOLDOWN = false
-                    Config.PayBill(data.id)
+                    CORE.Bridge.getPlayerObject().payBill(data.id)
                     Wait(100)
                     OpenBillMenu()
                 end,
@@ -1632,7 +1632,7 @@ end
 
 OpenCompanyMenu = function()
     local MENU = {}
-    local DATA_SOCIETY = lib.callback.await('zrx_personalmenu:server:getSocietyData', 500, CORE.Bridge.getVariables().job.name)
+    local DATA_SOCIETY = lib.callback.await('zrx_personalmenu:server:getSocietyData', 500, CORE.Bridge.getPlayerObject().job.name)
     local nearPlayer = lib.getClosestPlayer(GetEntityCoords(cache.ped), 3.0, false)
     local nearPlayerId = GetPlayerServerId(nearPlayer)
     local nearPlayerPed = GetPlayerPed(nearPlayer)
