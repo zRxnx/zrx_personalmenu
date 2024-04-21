@@ -2220,7 +2220,7 @@ StartCooldown = function()
 end
 
 IsGradeAllowed = function()
-    return not not Config.Company.allowedGrades[CORE.Bridge.getVariables().job.grade_name]
+    return not not Config.Company.allowedGrades[CORE.Bridge.getPlayerObject().job.grade_name]
 end
 
 IsVehicleValid = function()
