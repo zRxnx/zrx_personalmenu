@@ -558,6 +558,10 @@ OpenInfoLicenseMenu = function()
     local MENU = {}
     local PLAYER_LICENSES = lib.callback.await('zrx_personalmenu:server:getPlayerLicenses', 500)
 
+    if type(PLAYER_LICENSES) == 'string' then
+        PLAYER_LICENSES = {}
+    end
+
     StartCooldown()
 
     if #PLAYER_LICENSES > 0 then
@@ -1557,6 +1561,10 @@ OpenBillMenu = function()
         return OpenMainMenu()
     end
     StartCooldown()
+
+    if type(PLAYER_BILLS) == 'string' then
+        PLAYER_BILLS = {}
+    end
 
     for k, data in pairs(PLAYER_BILLS) do
         money += data.amount
