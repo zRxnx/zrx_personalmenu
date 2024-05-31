@@ -141,15 +141,15 @@ Config.VehicleKeys = function(action, player, vehicle)
 
     if IsDuplicityVersion() then
         if action == 'add' then
-
+            exports.zrx_carlock:giveKey(player, plate)
         elseif action == 'remove' then
-
+            exports.zrx_carlock:removeKey(player, plate)
         end
     else
         if action == 'add' then
-
+            exports.zrx_carlock:giveKey(plate)
         elseif action == 'remove' then
-
+            exports.zrx_carlock:removeKey(plate)
         end
     end
 end
